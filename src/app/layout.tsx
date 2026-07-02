@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import MainProviders from "@/Providers/MainProviders";
 import Provider from "@/Providers/Provider";
 import { Toaster } from "sonner";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -12,9 +18,12 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "sktch Labs",
+  title: "Discount Deals",
   description:
-    "Design amazing digital experiences that create more happy in the world.",
+    "Premium liquidation marketplace for live auctions, overstock inventory, and smart bidding.",
+  icons: {
+    icon: "/images/Logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -24,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>
+      <body className={`${inter.variable} ${poppins.variable} antialiased`}>
         <MainProviders>
           <Provider> {children} </Provider>
         </MainProviders>
