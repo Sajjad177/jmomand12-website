@@ -8,7 +8,7 @@ import { SiteBrand } from "./site-brand";
 export function SiteFooter() {
   return (
     <footer className="bg-[#08255a] text-white">
-      <div className="auction-shell py-12">
+      <div className="container py-12">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.6fr_0.6fr_1fr]">
           <div>
             <SiteBrand />

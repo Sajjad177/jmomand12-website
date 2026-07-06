@@ -5,19 +5,17 @@ import { SiteBrand } from "./site-brand";
 
 export function SiteHeader() {
   return (
-    <header>
-      <div className="bg-[#121a2a] text-white">
-        <div className="auction-shell flex h-6 items-center justify-between text-[11px]">
-          <div className="flex items-center gap-2">
-            <Check className="h-3 w-3" />
-            <span>Free Shipping On All Orders Over $50</span>
-          </div>
-          <div>Contact: (808) 555-0111</div>
+    <header className="bg-[#121a2a] text-white">
+      <div className="container flex h-6 items-center justify-between text-[11px]">
+        <div className="flex items-center gap-2">
+          <Check className="h-3 w-3" />
+          <span>Free Shipping On All Orders Over $50</span>
         </div>
+        <div>Contact: (808) 555-0111</div>
       </div>
 
       <div className="bg-black">
-        <div className="auction-shell flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="container flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <Link href="/" className="w-fit">
             <SiteBrand />
           </Link>
