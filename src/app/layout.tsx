@@ -4,6 +4,8 @@ import "./globals.css";
 import MainProviders from "@/Providers/MainProviders";
 import Provider from "@/Providers/Provider";
 import { Toaster } from "sonner";
+import { SiteHeader } from "@/features/auction-site/components/site-header";
+import { SiteFooter } from "@/features/auction-site/components/site-footer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -35,7 +37,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${poppins.variable} antialiased`}>
         <MainProviders>
+          <SiteHeader />
           <Provider> {children} </Provider>
+          <SiteFooter />
         </MainProviders>
         <Toaster position="top-right" closeButton />
       </body>

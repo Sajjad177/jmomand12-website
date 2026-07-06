@@ -9,10 +9,8 @@ import { categoriesNav, categoryFilters, categoryProducts } from "../data";
 export function CategoryPage() {
   return (
     <main className="bg-[#f7f9fc]">
-      <SiteHeader />
-
       <section className="bg-[linear-gradient(180deg,#00173f_0%,#003da5_100%)] py-14 text-white">
-        <div className="auction-shell text-center">
+        <div className="container text-center">
           <h1 className="text-[64px] font-bold leading-[1.2]">
             Appliance Auctions
           </h1>
@@ -23,7 +21,7 @@ export function CategoryPage() {
         </div>
       </section>
 
-      <section className="auction-shell py-10">
+      <section className="container py-10">
         <div className="grid gap-4 xl:grid-cols-[332px_minmax(0,1fr)]">
           <aside className="space-y-4">
             <div className="auction-card overflow-hidden rounded-[8px] bg-white">
@@ -180,8 +178,6 @@ export function CategoryPage() {
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </main>
   );
 }

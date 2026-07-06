@@ -34,7 +34,7 @@ export function ProductDetailsPage() {
     <main className="bg-[#f7f9fc]">
       <SiteHeader />
 
-      <section className="auction-shell py-10">
+      <section className="container py-10">
         <div className="grid gap-4 xl:grid-cols-[minmax(0,974px)_360px]">
           <div className="space-y-4">
             <div className="auction-card rounded-[8px] bg-white p-6">
@@ -312,7 +312,7 @@ export function ProductDetailsPage() {
         </div>
       </section>
 
-      <section className="auction-shell py-16">
+      <section className="container py-16">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-[40px] font-bold text-[#1e293b]">
             Similar Auctions Closing Soon
