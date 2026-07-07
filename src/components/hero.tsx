@@ -5,13 +5,13 @@ import Link from "next/link";
 export default function Hero() {
   return (
     <section
-      className=" "
+      className="relative overflow-hidden bg-cover bg-center"
       style={{
         backgroundImage: "url('/hero-bg.png')",
       }}
     >
       {/* Overlay */}
-      <div className="absolute inset-0 " />
+      <div className="pointer-events-none absolute inset-0" />
 
       <div className="container relative mx-auto flex items-center justify-between px-6 py-32 lg:px-8">
         {/* Left Content */}

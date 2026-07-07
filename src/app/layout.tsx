@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
-import "./globals.css";
+import { Inter } from "next/font/google";
 import MainProviders from "@/Providers/MainProviders";
 import Provider from "@/Providers/Provider";
+import "./globals.css";
 import { Toaster } from "sonner";
-import { SiteHeader } from "@/features/auction-site/components/site-header";
-import { SiteFooter } from "@/features/auction-site/components/site-footer";
+import NextTopLoader from "nextjs-toploader";
 
 const inter = Inter({
-  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
   weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -35,11 +28,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${poppins.variable} antialiased`}>
+      <body className={`${inter.className} antialiased`}>
         <MainProviders>
-          <SiteHeader />
-          <Provider> {children} </Provider>
-          <SiteFooter />
+          <Provider>
+            <NextTopLoader
+              color="#154242"
+              easing="ease-in"
+              showSpinner={false}
+            />
+            {children}
+          </Provider>
+        
         </MainProviders>
         <Toaster position="top-right" closeButton />
       </body>

@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { Search, ShoppingCart, Heart, User, Menu, Truck } from "lucide-react";
+import { Search, ShoppingCart, Heart, Menu, Truck } from "lucide-react";
+import AuthStatusButton from "@/features/auth/components/AuthStatusButton";
 
 export default function Navbar() {
   return (
@@ -67,9 +67,7 @@ export default function Navbar() {
             </button>
 
             {/* Profile */}
-            <button className="flex h-12 w-12 items-center justify-center rounded-lg bg-white hover:bg-gray-100 text-black">
-              <User size={20} />
-            </button>
+            <AuthStatusButton />
           </div>
         </div>
       </div>
