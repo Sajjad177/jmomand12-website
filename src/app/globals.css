@@ -173,3 +173,7 @@
     font-family: var(--font-poppins), sans-serif;
   }
 }
+
+.btn-gradient {
+  background: linear-gradient(180deg, #FFA576 0%, #FE6819 100%);
+}

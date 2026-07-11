@@ -2,45 +2,16 @@
 
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      name: string;
-      email: string;
-      image: string;
-      role: string;
-    };
-    accessToken: string;
-    refreshToken: string;
-  }
-
-  interface User {
-    id: string;
-    name: string;
-    email: string;
-    image: string;
-    role: string;
-    token: string;
-    refreshToken: string;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    name: string;
-    email: string;
-    image: string;
-    role: string;
-    accessToken: string;
-    refreshToken: string;
-  }
-}
-
 import { refreshAccessToken } from "@/features/auth/api/refresh-token.api";
+
+const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+
+const getRefreshTokenFromCookie = (setCookie: string | null) => {
+  if (!setCookie) return "";
+
+  const match = setCookie.match(/refreshToken=([^;]+)/);
+  return match?.[1] ? decodeURIComponent(match[1]) : "";
+};
 
 const handler = NextAuth({
   providers: [
@@ -66,7 +37,6 @@ const handler = NextAuth({
           });
 
           const data = await res.json();
-          console.log("API Login Response:", JSON.stringify(data, null, 2));
 
           if (!res.ok) {
             throw new Error(data.message || "Login failed");
@@ -74,23 +44,24 @@ const handler = NextAuth({
 
           const user = data.data?.user;
           const accessToken = data.data?.accessToken;
-
-          console.log("User details:", user);
-          console.log("Token:", accessToken);
+          const refreshToken = getRefreshTokenFromCookie(
+            res.headers.get("set-cookie"),
+          );
 
           if (!user || !accessToken) {
             throw new Error("Invalid response from server");
           }
 
-          // Return the object that NextAuth will use as 'user' in the jwt callback
           return {
-            id: user._id || user.id, // Ensure we get the ID
-            name: user.name,
+            id: user._id || user.id,
+            name:
+              user.name ||
+              [user.firstName, user.lastName].filter(Boolean).join(" "),
             email: user.email,
-            image: user.profileImage, // Map profileImage to image
+            image: user.image?.url || user.profileImage || "",
             role: user.role,
-            token: accessToken, // We attach the token here as a property of the user
-            refreshToken: user.refreshToken,
+            token: accessToken,
+            refreshToken,
           };
         } catch (error) {
           console.error("Authorize error:", error);
@@ -135,7 +106,7 @@ const handler = NextAuth({
       try {
         const refreshedTokens = await refreshAccessToken(token.refreshToken);
 
-        if (!refreshedTokens.status) {
+        if (!refreshedTokens.success) {
           throw refreshedTokens;
         }
 
@@ -143,7 +114,7 @@ const handler = NextAuth({
           ...token,
           accessToken: refreshedTokens.data.accessToken,
           accessTokenExpires: Date.now() + 60 * 60 * 1000, // Update expiration
-          refreshToken: refreshedTokens.data.refreshToken || token.refreshToken, // Fallback to old refresh token
+          refreshToken: token.refreshToken,
         };
       } catch (error) {
         console.error("Error refreshing access token", error);

@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Check, Heart, Menu, Search, ShoppingCart, User } from "lucide-react";
+import { Check, Heart, Menu, Search, ShoppingCart } from "lucide-react";
+import AuthStatusButton from "@/features/auth/components/AuthStatusButton";
 
 import { SiteBrand } from "./site-brand";
 
 export function SiteHeader() {
   return (
-    <header className="bg-[#121a2a] text-white">
+    <header className="relative z-50 bg-[#121a2a] text-white">
       <div className="container flex h-6 items-center justify-between text-[11px]">
         <div className="flex items-center gap-2">
           <Check className="h-3 w-3" />
@@ -54,9 +55,7 @@ export function SiteHeader() {
             <button className="flex h-11 w-11 items-center justify-center rounded-[6px] bg-white text-[#111827]">
               <Heart className="h-4 w-4" />
             </button>
-            <button className="flex h-11 w-11 items-center justify-center rounded-[6px] bg-white text-[#111827]">
-              <User className="h-4 w-4" />
-            </button>
+            <AuthStatusButton />
           </div>
         </div>
       </div>
