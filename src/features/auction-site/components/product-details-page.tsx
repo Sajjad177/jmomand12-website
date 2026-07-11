@@ -32,7 +32,6 @@ const specs = [
 export function ProductDetailsPage() {
   return (
     <main className="bg-[#f7f9fc]">
-      <SiteHeader />
 
       <section className="container py-10">
         <div className="grid gap-4 xl:grid-cols-[minmax(0,974px)_360px]">
@@ -338,8 +337,6 @@ export function ProductDetailsPage() {
           ))}
         </div>
       </section>
-
-      <SiteFooter />
     </main>
   );
 }
