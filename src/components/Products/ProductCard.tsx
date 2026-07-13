@@ -9,7 +9,6 @@ type ProductCardProps = {
   category: string;
   bids: number;
   price: string;
-  oldPrice: string;
 };
 
 export default function ProductCard({
@@ -18,7 +17,6 @@ export default function ProductCard({
   category,
   bids,
   price,
-  oldPrice,
 }: ProductCardProps) {
   return (
     <Link href={"/products-list/asf56465sdfa"}>
@@ -50,10 +48,6 @@ export default function ProductCard({
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <h4 className="text-2xl font-bold text-black">{price}</h4>
-
-              <p className="mt-1 text-base text-zinc-700 line-through">
-                {oldPrice}
-              </p>
             </div>
 
             <button className="flex-1 rounded-sm border border-orange-500 px-6 py-4 text-sm font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white">
