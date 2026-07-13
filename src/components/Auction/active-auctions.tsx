@@ -1,83 +1,122 @@
 "use client";
 
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import AuctionCard from "./auction-card";
-const auctions = [
-  {
-    id: 1,
-    image: "/img/auctions/auction-1.png",
-    title: 'Samsung 55" Smart TV',
-    category: "Electronics",
-    bids: 42,
-    currentBid: "$1,240",
-    timeLeft: "02h 14m",
-  },
-  {
-    id: 2,
-    image: "/img/auctions/auction-2.png",
-    title: "Luxury Office Chair",
-    category: "Furniture",
-    bids: 31,
-    currentBid: "$420",
-    timeLeft: "04h 08m",
-  },
-  {
-    id: 3,
-    image: "/img/auctions/auction-3.png",
-    title: "Kitchen Appliance Set",
-    category: "Kitchen",
-    bids: 18,
-    currentBid: "$560",
-    timeLeft: "01h 53m",
-  },
-  {
-    id: 4,
-    image: "/img/auctions/auction-4.png",
-    title: "Apple MacBook Pro",
-    category: "Electronics",
-    bids: 67,
-    currentBid: "$2,150",
-    timeLeft: "06h 11m",
-  },
-  {
-    id: 5,
-    image: "/img/auctions/auction-5.png",
-    title: "Cordless Power Drill",
-    category: "Tools",
-    bids: 15,
-    currentBid: "$180",
-    timeLeft: "03h 32m",
-  },
-  {
-    id: 6,
-    image: "/img/auctions/auction-6.png",
-    title: "Dining Table Set",
-    category: "Furniture",
-    bids: 24,
-    currentBid: "$980",
-    timeLeft: "05h 28m",
-  },
-  {
-    id: 7,
-    image: "/img/auctions/auction-7.png",
-    title: "Gaming Console Bundle",
-    category: "Gaming",
-    bids: 54,
-    currentBid: "$720",
-    timeLeft: "02h 45m",
-  },
-  {
-    id: 8,
-    image: "/img/auctions/auction-8.png",
-    title: "Coffee Machine",
-    category: "Appliances",
-    bids: 19,
-    currentBid: "$350",
-    timeLeft: "07h 20m",
-  },
-];
+
+// --- Shadcn UI Skeleton Component Inline Implementation ---
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={`animate-pulse rounded-md bg-slate-200/80 dark:bg-slate-800/80 ${className}`}
+      {...props}
+    />
+  );
+}
+
+// --- API Interfaces Definition matching your response structural mapping ---
+interface AuctionProductImage {
+  public_id: string;
+  url: string;
+}
+
+interface AuctionProduct {
+  _id: string;
+  inventoryId: string;
+  title: string;
+  description: string;
+  category: string;
+  condition: string;
+  day: string;
+  reservePrice: number;
+  inventoryStatus: string;
+  images: AuctionProductImage[];
+  totalReview: number;
+  type: string;
+  color: string[];
+  quantity: number;
+  averageReview: number;
+}
+
+interface PickupSchedule {
+  startDate: string;
+  endDate: string;
+  dailyStartTime: string;
+  dailyEndTime: string;
+  durationInDays: number;
+}
+
+interface AuctionItem {
+  _id: string;
+  auctionId: string;
+  products: AuctionProduct[];
+  title: string;
+  description: string;
+  startsAt: string;
+  endsAt: string;
+  durationInDays: number;
+  status: string;
+  pickupSchedule: PickupSchedule;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface MetaData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
+interface ActiveAuctionResponse {
+  success: boolean;
+  message: string;
+  statusCode: number;
+  data: {
+    meta: MetaData;
+    data: AuctionItem[];
+  };
+}
 
 export default function ActiveAuctions() {
+  // Fetching Active Auctions via TanStack useQuery
+  const { data: responseData, isLoading, isError } = useQuery<ActiveAuctionResponse>({
+    queryKey: ["activeAuctionsData"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auctions/active`
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Failed to fetch active auctions data");
+      }
+
+      return result;
+    },
+  });
+
+  const auctionsList = responseData?.data?.data || [];
+
+  // Time left formatting logic implementation wrapper for endsAt string
+  const calculateTimeLeft = (endsAtStr: string) => {
+    const total = Date.parse(endsAtStr) - Date.parse(new Date().toString());
+    if (total <= 0) return "Ended";
+    
+    const days = Math.floor(total / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((total / 1000 / 60) % 60);
+
+    if (days > 0) {
+      return `${days}d ${hours}h`;
+    }
+    return `${hours}h ${minutes}m`;
+  };
+
   return (
     <section className="bg-[#F8FAFC] py-20">
       <div className="container mx-auto px-6 lg:px-8">
@@ -106,20 +145,68 @@ export default function ActiveAuctions() {
           </Link>
         </div>
 
-        {/* Auction Grid */}
-        <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-          {auctions.map((auction) => (
-            <AuctionCard
-              key={auction.id}
-              image={auction.image}
-              title={auction.title}
-              category={auction.category}
-              bids={auction.bids}
-              currentBid={auction.currentBid}
-              timeLeft={auction.timeLeft}
-            />
-          ))}
-        </div>
+        {/* Dynamic Skeleton and Error UI Block states tracking inside same grid template */}
+        {isLoading ? (
+          /* --- Shadcn UI Skeleton Grid Layout matching your AuctionCard structure --- */
+          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex flex-col overflow-hidden rounded-xl border border-slate-100 bg-white p-4 shadow-sm space-y-4"
+              >
+                {/* Image Placeholder */}
+                <Skeleton className="h-48 w-full rounded-lg" />
+                
+                {/* Category & Title Placeholders */}
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-5 w-3/4" />
+                </div>
+
+                {/* Footer Meta Data Placeholders */}
+                <div className="pt-2 border-t border-slate-50 flex items-center justify-between">
+                  <div className="space-y-1 w-1/3">
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                  <Skeleton className="h-6 w-1/4 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="text-center py-12 text-red-500 font-medium">
+            Failed to connect or pull live marketplace streaming data.
+          </div>
+        ) : auctionsList.length === 0 ? (
+          <div className="text-center py-12 text-slate-400 font-medium">
+            No live active auctions right now. Check back soon!
+          </div>
+        ) : (
+          /* Auction Grid Layer renders if mapping length exists */
+          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+            {auctionsList.map((auction) => {
+              // Extracting primary item context layer for card visual presentation fallback
+              const primaryProduct = auction.products?.[0];
+              const displayImage = primaryProduct?.images?.[0]?.url || "/img/auctions/placeholder.png";
+              const displayTitle = auction.title || primaryProduct?.title || "Untitled Auction";
+              const displayCategory = primaryProduct?.category || "General Marketplace";
+              const displayReservePrice = primaryProduct?.reservePrice ? `$${primaryProduct.reservePrice}` : "N/A";
+
+              return (
+                <AuctionCard
+                  key={auction._id}
+                  image={displayImage}
+                  title={displayTitle}
+                  category={displayCategory}
+                  bids={0}
+                  currentBid={displayReservePrice}
+                  timeLeft={calculateTimeLeft(auction.endsAt)}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );
