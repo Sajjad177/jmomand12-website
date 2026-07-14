@@ -1,5 +1,5 @@
-import { CategoryPage } from "@/features/auction-site/components/category-page";
+import AuctionListingPage from "@/features/auction-site/components/category-page";
 
 export default function Page() {
-  return <CategoryPage />;
+  return <AuctionListingPage/>;
 }

@@ -71,7 +71,7 @@ interface MetaData {
   totalPage: number;
 }
 
-interface ActiveAuctionResponse {
+export interface ActiveAuctionResponse {
   success: boolean;
   message: string;
   statusCode: number;
@@ -83,17 +83,23 @@ interface ActiveAuctionResponse {
 
 export default function ActiveAuctions() {
   // Fetching Active Auctions via TanStack useQuery
-  const { data: responseData, isLoading, isError } = useQuery<ActiveAuctionResponse>({
+  const {
+    data: responseData,
+    isLoading,
+    isError,
+  } = useQuery<ActiveAuctionResponse>({
     queryKey: ["activeAuctionsData"],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auctions/active`
+        `${process.env.NEXT_PUBLIC_API_URL}/auctions/active`,
       );
 
       const result = await response.json();
 
       if (!response.ok || result.success === false) {
-        throw new Error(result.message || "Failed to fetch active auctions data");
+        throw new Error(
+          result.message || "Failed to fetch active auctions data",
+        );
       }
 
       return result;
@@ -106,7 +112,7 @@ export default function ActiveAuctions() {
   const calculateTimeLeft = (endsAtStr: string) => {
     const total = Date.parse(endsAtStr) - Date.parse(new Date().toString());
     if (total <= 0) return "Ended";
-    
+
     const days = Math.floor(total / (1000 * 60 * 60 * 24));
     const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((total / 1000 / 60) % 60);
@@ -156,7 +162,7 @@ export default function ActiveAuctions() {
               >
                 {/* Image Placeholder */}
                 <Skeleton className="h-48 w-full rounded-lg" />
-                
+
                 {/* Category & Title Placeholders */}
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-1/4" />
@@ -188,14 +194,21 @@ export default function ActiveAuctions() {
             {auctionsList.map((auction) => {
               // Extracting primary item context layer for card visual presentation fallback
               const primaryProduct = auction.products?.[0];
-              const displayImage = primaryProduct?.images?.[0]?.url || "/img/auctions/placeholder.png";
-              const displayTitle = auction.title || primaryProduct?.title || "Untitled Auction";
-              const displayCategory = primaryProduct?.category || "General Marketplace";
-              const displayReservePrice = primaryProduct?.reservePrice ? `$${primaryProduct.reservePrice}` : "N/A";
+              const displayImage =
+                primaryProduct?.images?.[0]?.url ||
+                "/img/auctions/placeholder.png";
+              const displayTitle =
+                auction.title || primaryProduct?.title || "Untitled Auction";
+              const displayCategory =
+                primaryProduct?.category || "General Marketplace";
+              const displayReservePrice = primaryProduct?.reservePrice
+                ? `$${primaryProduct.reservePrice}`
+                : "N/A";
 
               return (
                 <AuctionCard
                   key={auction._id}
+                  id={auction._id}
                   image={displayImage}
                   title={displayTitle}
                   category={displayCategory}
