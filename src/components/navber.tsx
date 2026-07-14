@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Search, ShoppingCart, Heart, Menu, Truck } from "lucide-react";
 import AuthStatusButton from "@/features/auth/components/AuthStatusButton";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
@@ -52,6 +53,7 @@ export default function Navbar() {
             </button>
 
             {/* Cart */}
+            <Link href={"/cart"}>
             <button className="relative flex h-12 items-center gap-2 rounded-lg bg-white px-4 hover:bg-gray-100 text-black">
               <ShoppingCart size={20} />
               <span className="text-sm font-medium">Cart</span>
@@ -60,6 +62,7 @@ export default function Navbar() {
                 2
               </span>
             </button>
+            </Link>
 
             {/* Wishlist */}
             <button className="flex h-12 w-12 items-center justify-center rounded-lg bg-white hover:bg-gray-100 text-black">

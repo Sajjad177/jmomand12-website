@@ -9,13 +9,15 @@ type ProductCardProps = {
   category: string;
   bids: number;
   price: string;
+  id: string
+
 };
 
 export default function ProductCard({
   image,
   title,
   category,
-  bids,
+  id,
   price,
 }: ProductCardProps) {
   return (
@@ -50,9 +52,11 @@ export default function ProductCard({
               <h4 className="text-2xl font-bold text-black">{price}</h4>
             </div>
 
+           <Link href={`/product-details/${id}`}>
             <button className="flex-1 rounded-sm border border-orange-500 px-6 py-4 text-sm font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white">
-              Add to Cart
+              View Product
             </button>
+           </Link>
           </div>
         </div>
       </div>
