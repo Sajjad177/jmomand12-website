@@ -43,7 +43,7 @@ export function SiteHeader() {
               All Categories
             </Link>
             <Link
-              href="/product-details"
+              href="/cart"
               className="flex h-11 items-center gap-2 rounded-[6px] bg-white px-4 text-[13px] font-medium text-[#111827]"
             >
               <ShoppingCart className="h-4 w-4" />
