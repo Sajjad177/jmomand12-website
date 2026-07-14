@@ -214,9 +214,9 @@ export default function ProductDetailsPage() {
                   priority
                 />
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  <span className="rounded-[4px] bg-[#ff6b1a] px-2 py-0.5 text-[10px] font-bold text-white uppercase">
+                  {/* <span className="rounded-[4px] bg-[#ff6b1a] px-2 py-0.5 text-[10px] font-bold text-white uppercase">
                     30% OFF
-                  </span>
+                  </span> */}
                   <span className={`rounded-[4px] px-2 py-0.5 text-[10px] font-bold text-white uppercase ${
                     product.inventoryStatus === "available" ? "bg-emerald-500" : "bg-red-500"
                   }`}>
