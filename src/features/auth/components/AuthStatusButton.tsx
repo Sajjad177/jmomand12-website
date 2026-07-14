@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, LogIn, LogOut, User } from "lucide-react";
@@ -17,12 +19,43 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getMyProfile } from "@/features/dashboard/api/dashboard.api";
 import { getInitials } from "../utils/name";
 
 export default function AuthStatusButton() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const user = session?.user;
+  const profile = useQuery({
+    queryKey: ["auth", "navbar-profile"],
+    queryFn: getMyProfile,
+    enabled: status === "authenticated",
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (status !== "authenticated" || !user || !profile.data) return;
+
+    const profileName =
+      [profile.data.firstName, profile.data.lastName].filter(Boolean).join(" ") || profile.data.email;
+    const profileImage = profile.data.image?.url ?? "";
+    const shouldSync =
+      user.name !== profileName ||
+      user.email !== profile.data.email ||
+      (user.image ?? "") !== profileImage;
+
+    if (!shouldSync) return;
+
+    void update({
+      user: {
+        name: profileName,
+        email: profile.data.email,
+        image: profileImage,
+        role: profile.data.role,
+      },
+    });
+  }, [profile.data, status, update, user]);
 
   if (status !== "authenticated" || !user) {
     return (

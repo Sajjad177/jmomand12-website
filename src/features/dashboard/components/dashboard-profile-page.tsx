@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Camera, CreditCard, LockKeyhole, Save, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -31,6 +32,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export function DashboardProfilePage() {
   const profile = useDashboardProfile();
   const updateProfile = useUpdateDashboardProfile();
+  const { update: updateSession } = useSession();
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const defaultValues = useMemo<ProfileFormValues>(
@@ -49,8 +51,26 @@ export function DashboardProfilePage() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
-    values: defaultValues,
+    defaultValues,
   });
+
+  useEffect(() => {
+    if (!profile.data) return;
+    form.reset(defaultValues);
+  }, [defaultValues, form, profile.data]);
+
+  const imagePreview = useMemo(() => {
+    if (!imageFile) return profile.data?.image?.url ?? "";
+    return URL.createObjectURL(imageFile);
+  }, [imageFile, profile.data?.image?.url]);
+
+  useEffect(() => {
+    if (!imageFile || !imagePreview.startsWith("blob:")) return;
+
+    return () => {
+      URL.revokeObjectURL(imagePreview);
+    };
+  }, [imageFile, imagePreview]);
 
   const initials =
     `${profile.data?.firstName?.[0] ?? ""}${profile.data?.lastName?.[0] ?? ""}`.toUpperCase() ||
@@ -58,8 +78,16 @@ export function DashboardProfilePage() {
 
   async function onSubmit(values: ProfileFormValues) {
     try {
-      await updateProfile.mutateAsync({ ...values, image: imageFile });
+      const updatedProfile = await updateProfile.mutateAsync({ ...values, image: imageFile });
       setImageFile(null);
+      await updateSession({
+        user: {
+          name: [updatedProfile.firstName, updatedProfile.lastName].filter(Boolean).join(" "),
+          email: updatedProfile.email,
+          image: updatedProfile.image?.url ?? "",
+          role: updatedProfile.role,
+        },
+      });
       toast.success("Profile updated successfully.");
     } catch {
       toast.error("We couldn't save your profile changes.");
@@ -113,8 +141,8 @@ export function DashboardProfilePage() {
           <div className="mt-6 flex flex-col gap-5 md:flex-row md:items-center">
             <div className="relative w-fit">
               <Avatar className="h-24 w-24 border-4 border-white shadow-md">
-                {profile.data.image?.url ? (
-                  <AvatarImage src={profile.data.image.url} alt={profile.data.firstName} />
+                {imagePreview ? (
+                  <AvatarImage src={imagePreview} alt={profile.data.firstName} />
                 ) : null}
                 <AvatarFallback className="bg-[#003da5] text-2xl font-bold text-white">
                   {initials}
@@ -136,19 +164,22 @@ export function DashboardProfilePage() {
                   onChange={(event) => setImageFile(event.target.files?.[0] ?? null)}
                 />
               </label>
-              {profile.data.image?.url ? (
+              {imageFile ? (
                 <Button
                   type="button"
                   variant="outline"
                   className="rounded-xl border-[#dce6f5]"
                   onClick={() => setImageFile(null)}
                 >
-                  Clear selection
+                  Remove new photo
                 </Button>
               ) : null}
             </div>
           </div>
-          <p className="mt-3 text-xs text-[#94a3b8]">JPG, PNG, GIF, or WebP. Uploads use the existing profile API.</p>
+          <div className="mt-3 space-y-1 text-xs text-[#94a3b8]">
+            <p>JPG, PNG, GIF, or WebP. Uploads use the existing profile API.</p>
+            {imageFile ? <p>Selected file: {imageFile.name}</p> : null}
+          </div>
         </section>
 
         <Form {...form}>
