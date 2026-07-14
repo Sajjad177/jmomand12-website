@@ -141,7 +141,7 @@ export default function FeaturedProducts() {
                   category={product.category}
                   bids={0} // Default static value context if required by core layout design properties
                   price={displayPrice}
-             
+                  
                 />
               );
             })}
