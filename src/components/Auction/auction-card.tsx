@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 interface AuctionCardProps {
   image: string;
@@ -9,6 +10,7 @@ interface AuctionCardProps {
   bids: number;
   currentBid: string;
   timeLeft: string;
+  id:string
 }
 
 export default function AuctionCard({
@@ -16,9 +18,12 @@ export default function AuctionCard({
   title,
   category,
   bids,
+  id,
   currentBid,
   timeLeft,
 }: AuctionCardProps) {
+
+  
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
       {/* Image */}
@@ -71,9 +76,11 @@ export default function AuctionCard({
           </div>
         </div>
 
-        <button className="w-full rounded border border-orange-500 py-4 font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white">
-          Bid Now
+        <Link href={`/auctions-details/${id}`}>
+        <button  className="w-full rounded border border-orange-500 py-4 font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white">
+         View Details
         </button>
+        </Link>
       </div>
     </div>
   );

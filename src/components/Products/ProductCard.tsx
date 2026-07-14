@@ -40,7 +40,7 @@ export default function ProductCard({
             </h3>
 
             <p className="text-base font-bold uppercase text-gray-500">
-              {category} • {bids} BIDS
+              {category}
             </p>
           </div>
 
