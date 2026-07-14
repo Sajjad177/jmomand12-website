@@ -7,7 +7,7 @@ export default function Hero() {
     <section className="relative overflow-hidden bg-blue-800">
       {/* Removed empty overlay — add one with actual content if needed, e.g. a gradient */}
 
-      <div className="container relative mx-auto flex items-center justify-between px-6 py-32 lg:px-8">
+      <div className="container relative mx-auto flex items-center justify-between px-6 py-16 lg:px-8">
         {/* Left Content */}
         <div className="max-w-3xl">
           <p className="mb-4 text-lg uppercase tracking-[0.3em] text-gray-200">
