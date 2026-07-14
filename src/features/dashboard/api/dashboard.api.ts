@@ -1,0 +1,66 @@
+import { api } from "@/lib/api";
+import type {
+  ApiResponse,
+  Invoice,
+  PickupAppointment,
+  PickupSlot,
+  UpdateProfilePayload,
+  UserProfile,
+} from "../types";
+
+export async function getMyProfile() {
+  const response = await api.get<ApiResponse<UserProfile>>("/users/me");
+  return response.data.data;
+}
+
+export async function updateMyProfile(payload: UpdateProfilePayload) {
+  const formData = new FormData();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value == null || value === "") return;
+    if (key === "image" && value instanceof File) {
+      formData.append("image", value);
+      return;
+    }
+
+    if (typeof value === "string") {
+      formData.append(key, value);
+    }
+  });
+
+  const response = await api.patch<ApiResponse<UserProfile>>("/users/me", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data.data;
+}
+
+export async function getMyInvoices() {
+  const response = await api.get<ApiResponse<Invoice[]>>("/invoices/me");
+  return response.data.data;
+}
+
+export async function getMyPickupAppointments() {
+  const response = await api.get<ApiResponse<PickupAppointment[]>>("/pickups/me");
+  return response.data.data;
+}
+
+export async function getMyReadyInvoices() {
+  const response = await api.get<ApiResponse<Invoice[]>>("/pickups/ready-invoices");
+  return response.data.data;
+}
+
+export async function getAvailablePickupSlots() {
+  const response = await api.get<ApiResponse<PickupSlot[]>>("/pickups/slots");
+  return response.data.data;
+}
+
+export async function schedulePickup(payload: {
+  slotId: string;
+  invoiceIds: string[];
+}) {
+  const response = await api.post<ApiResponse<PickupAppointment>>("/pickups", payload);
+  return response.data.data;
+}
