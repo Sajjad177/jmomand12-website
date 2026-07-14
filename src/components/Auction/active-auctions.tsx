@@ -144,10 +144,10 @@ export default function ActiveAuctions() {
           </div>
 
           <Link
-            href="/auctions"
+            href="/category"
             className="inline-flex w-fit items-center rounded bg-orange-500 px-8 py-4 font-semibold text-white transition hover:bg-orange-600"
           >
-            View All Auctions
+            View All
           </Link>
         </div>
 
