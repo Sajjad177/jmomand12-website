@@ -3,10 +3,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trash2, Share2, Plus, Minus, Shield, RefreshCw, Truck, CheckCircle2, Info } from "lucide-react";
+import { Trash2, Plus, Minus, Shield, RefreshCw, Truck, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { createCartCheckoutSession } from "@/features/orders/api/orders.api";
 
 // --- Shadcn UI Skeleton loader component helper ---
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
@@ -60,8 +62,26 @@ interface CartApiResponse {
 
 export default function UserCartPage() {
   const queryClient = useQueryClient();
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const token = session?.accessToken;
+
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "response" in error &&
+      typeof (error as { response?: { data?: { message?: string } } }).response?.data?.message === "string"
+    ) {
+      return (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? fallback;
+    }
+
+    if (error instanceof Error && error.message) {
+      return error.message;
+    }
+
+    return fallback;
+  };
 
   // --- 1. Fetch Cart Items Query ---
   const { data: response, isLoading, isError } = useQuery<CartApiResponse>({
@@ -133,6 +153,22 @@ export default function UserCartPage() {
     },
   });
 
+  const checkoutMutation = useMutation({
+    mutationFn: createCartCheckoutSession,
+    onSuccess: (result) => {
+      if (!result.checkoutUrl) {
+        toast.error("The checkout session was created, but no checkout URL was returned.");
+        return;
+      }
+
+      toast.success("Redirecting to secure checkout...");
+      window.location.assign(result.checkoutUrl);
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "We couldn't start checkout right now."));
+    },
+  });
+
   // --- Order Breakdown Math Calculations ---
 const netGrandTotal = cartItems.reduce(
   (total, item) =>
@@ -162,6 +198,12 @@ const netGrandTotal = cartItems.reduce(
       <main className="bg-[#f7f9fc] min-h-screen flex flex-col items-center justify-center p-6 text-center">
         <h2 className="text-lg font-bold text-slate-800">Authorization / Fetch Error</h2>
         <p className="text-sm text-slate-500 mt-1">Please ensure you are authenticated or that your session token hasn&apos;t expired.</p>
+        <Link
+          href="/login?callbackUrl=%2Fcart"
+          className="mt-4 inline-flex rounded bg-[#003da5] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#002b75]"
+        >
+          Sign in again
+        </Link>
       </main>
     );
   }
@@ -358,11 +400,18 @@ const netGrandTotal = cartItems.reduce(
                 {/* Main Process Button handlers */}
                 <div className="pt-4 space-y-2.5">
                   <button
-                    onClick={() => toast.success("Transitioning security layers to terminal checking pipeline...")}
-                    disabled={cartItems.length === 0}
+                    onClick={() => {
+                      if (status !== "authenticated") {
+                        router.push("/login?callbackUrl=%2Fcart");
+                        return;
+                      }
+
+                      checkoutMutation.mutate();
+                    }}
+                    disabled={cartItems.length === 0 || checkoutMutation.isPending || status === "loading"}
                     className="w-full h-11 bg-[#ff6b1a] hover:bg-[#e55a00] text-white font-bold text-sm rounded transition-all shadow-sm disabled:opacity-50"
                   >
-                    Proceed to Checkout
+                    {checkoutMutation.isPending ? "Redirecting to Checkout..." : "Proceed to Checkout"}
                   </button>
                   
                   <Link
