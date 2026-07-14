@@ -9,6 +9,11 @@ export function formatMoney(amount: number) {
   }).format(amount);
 }
 
+export function formatCompactDate(value?: string | null) {
+  if (!value) return "Not available";
+  return format(parseISO(value), "MMM d, yyyy");
+}
+
 export function formatShortDate(value?: string) {
   if (!value) return "Not available";
   return format(parseISO(value), "MMM d, yyyy");
@@ -40,6 +45,13 @@ export function getTimeUntil(value?: string) {
   } catch {
     return "No deadline";
   }
+}
+
+export function formatStatusLabel(value?: string | null) {
+  if (!value) return "Not available";
+  return value
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 export function getProfileCompletion(profile?: UserProfile) {

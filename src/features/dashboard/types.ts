@@ -44,6 +44,7 @@ export type ProductSummary = {
   description?: string;
   category: string;
   condition?: string;
+  type?: string;
   images?: ProductImage[];
   inventoryStatus?: string;
 };
@@ -102,6 +103,73 @@ export type DashboardOrder = {
   appointment?: PickupAppointment;
   pickupStatusLabel: string;
   pickupActionable: boolean;
+};
+
+export type DashboardAuctionSummary = {
+  active: number;
+  won: number;
+  lost: number;
+};
+
+export type DashboardAuctionActiveItem = {
+  auctionProductId: string;
+  auctionId: string | null;
+  auctionRef: string | null;
+  productId: string | null;
+  title: string;
+  category: string;
+  image: string | null;
+  endsAt: string | null;
+  totalBids: number;
+  currentBid: number;
+  yourBid: number;
+  minimumNextBid: number;
+  isLeading: boolean;
+  outbidBy: number;
+};
+
+export type DashboardAuctionWonItem = {
+  auctionProductId: string;
+  auctionId: string | null;
+  auctionRef: string | null;
+  productId: string | null;
+  title: string;
+  category: string;
+  image: string | null;
+  winningBid: number;
+  winningDate: string | null;
+  paymentStatus: string | null;
+  pickupStatus: string | null;
+  invoiceId: string | null;
+  invoiceNumber: string | null;
+};
+
+export type DashboardAuctionLostItem = {
+  auctionProductId: string;
+  auctionId: string | null;
+  auctionRef: string | null;
+  productId: string | null;
+  title: string;
+  category: string;
+  image: string | null;
+  yourFinalBid: number;
+  winningBid: number;
+  endedOn: string | null;
+};
+
+export type DashboardAuctionActivity = {
+  summary: DashboardAuctionSummary;
+  active: DashboardAuctionActiveItem[];
+  won: DashboardAuctionWonItem[];
+  lost: DashboardAuctionLostItem[];
+};
+
+export type WishlistItem = {
+  _id: string;
+  type: "wishlist";
+  createdAt: string;
+  updatedAt: string;
+  productId: ProductSummary;
 };
 
 export type UpdateProfilePayload = {

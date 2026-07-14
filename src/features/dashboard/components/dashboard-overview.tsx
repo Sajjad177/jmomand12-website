@@ -1,312 +1,565 @@
 "use client";
 
 import Link from "next/link";
-import { AlertCircle, CalendarClock, CheckCircle2, CreditCard, Package, UserCircle2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo, useState } from "react";
+import {
+  ArrowRight,
+  Bell,
+  FileText,
+  Gavel,
+  Heart,
+  Hourglass,
+  Settings,
+  TriangleAlert,
+  Trophy,
+  XCircle,
+} from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardShell } from "./dashboard-shell";
 import {
-  useDashboardAppointments,
+  useDashboardAuctionActivity,
   useDashboardInvoices,
   useDashboardProfile,
-  useDashboardReadyInvoices,
 } from "../hooks/useDashboardData";
-import { formatDateTime, formatMoney, formatSlotWindow, getProfileCompletion, mapOrders } from "../utils";
+import type {
+  DashboardAuctionActiveItem,
+  DashboardAuctionLostItem,
+  DashboardAuctionWonItem,
+} from "../types";
+import {
+  formatCompactDate,
+  formatMoney,
+  formatStatusLabel,
+  getTimeUntil,
+} from "../utils";
 
-function StatCard({
+type DashboardTab = "active" | "won" | "lost";
+
+function SummaryCard({
   label,
   value,
-  hint,
   tone,
   icon: Icon,
 }: {
   label: string;
-  value: string;
-  hint: string;
-  tone: "orange" | "green" | "blue" | "slate";
+  value: number;
+  tone: "orange" | "green" | "red";
   icon: React.ComponentType<{ className?: string }>;
 }) {
   const tones = {
-    orange: "border-[#ffb86a] bg-[#fff7ed] text-[#fe6819]",
-    green: "border-[#b7efcd] bg-[#effcf4] text-[#00a63e]",
-    blue: "border-[#cfe0ff] bg-[#f3f7ff] text-[#003da5]",
-    slate: "border-[#dce6f5] bg-white text-[#111827]",
+    orange: {
+      card: "border-[#ffb86a] bg-[#fff7ed]",
+      icon: "bg-[#ffedd4] text-[#ff6900]",
+      value: "text-[#ff6900]",
+    },
+    green: {
+      card: "border-[rgba(0,166,62,0.5)] bg-[rgba(0,166,62,0.1)]",
+      icon: "bg-[#dcfce7] text-[#00a63e]",
+      value: "text-[#00a63e]",
+    },
+    red: {
+      card: "border-[rgba(251,44,54,0.5)] bg-[rgba(251,44,54,0.1)]",
+      icon: "bg-[#ffe2e2] text-[#fb2c36]",
+      value: "text-[#fb2c36]",
+    },
   } as const;
 
   return (
-    <div className={`rounded-2xl border p-5 ${tones[tone]}`}>
+    <div className={`rounded-lg border p-5 ${tones[tone].card}`}>
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80">
-          <Icon className="h-5 w-5" />
+        <div className={`flex h-8 w-8 items-center justify-center rounded ${tones[tone].icon}`}>
+          <Icon className="h-4 w-4" />
         </div>
-        <div>
-          <p className="text-sm font-medium">{label}</p>
-          <p className="mt-2 text-3xl font-bold">{value}</p>
+        <p className="text-base text-[#737373]">{label}</p>
+      </div>
+      <p className={`mt-5 text-[26px] font-bold leading-none ${tones[tone].value}`}>{value}</p>
+    </div>
+  );
+}
+
+function QuickActionCard({
+  href,
+  label,
+  tone,
+  icon: Icon,
+  caption,
+}: {
+  href: string;
+  label: string;
+  tone: "orange" | "red" | "blue";
+  icon: React.ComponentType<{ className?: string }>;
+  caption?: string;
+}) {
+  const tones = {
+    orange: "bg-[#ffedd4] text-[#ff6900]",
+    red: "bg-[#ffe2e2] text-[#fb2c36]",
+    blue: "bg-[#e0e7ff] text-[#4f46e5]",
+  } as const;
+
+  return (
+    <Link
+      href={href}
+      className="rounded-lg border border-[#dce6f5] bg-white px-4 py-6 text-center transition hover:border-[#ffb86a] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6900]"
+    >
+      <div className={`mx-auto flex h-9 w-9 items-center justify-center rounded-[10px] ${tones[tone]}`}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <p className="mt-3 text-sm font-medium text-[#262626]">{label}</p>
+      {caption ? <p className="mt-1 text-xs text-[#737373]">{caption}</p> : null}
+    </Link>
+  );
+}
+
+function TabButton({
+  active,
+  label,
+  count,
+  icon: Icon,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  count: number;
+  icon: React.ComponentType<{ className?: string }>;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition ${
+        active ? "bg-[#ff6900] text-white" : "bg-[#f5f5f5] text-[#525252] hover:bg-[#fff1e7]"
+      }`}
+    >
+      <Icon className="h-4 w-4" />
+      <span>{label}</span>
+      <span className={`rounded-full px-1.5 text-xs ${active ? "bg-white/25" : "bg-[#e5e5e5]"}`}>
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function EmptyActivityState() {
+  return (
+    <div className="rounded-lg border border-[#dce6f5] bg-white px-4 py-16 text-center">
+      <div className="mx-auto flex h-9 w-9 items-center justify-center text-[#d4d4d8]">
+        <Gavel className="h-8 w-8" />
+      </div>
+      <p className="mt-4 text-base text-[#737373]">No active bids right now</p>
+      <Link
+        href="/category"
+        className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-[#ff6900]"
+      >
+        Browse Auctions
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  );
+}
+
+function ActivityImage({ src, alt }: { src: string | null; alt: string }) {
+  return (
+    <div className="h-[120px] w-[120px] overflow-hidden rounded-lg bg-[#f3f4f6]">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={alt} className="h-full w-full object-cover" />
+      ) : null}
+    </div>
+  );
+}
+
+function ActiveBidCard({ item }: { item: DashboardAuctionActiveItem }) {
+  const statusTone = item.isLeading
+    ? "border-[#c3f7db] bg-[#ecfdf5] text-[#059669]"
+    : "border-[#fecdd3] bg-[#fff1f2] text-[#dc2626]";
+
+  return (
+    <article className="rounded-lg border border-[#dce6f5] bg-white p-4">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
+        <div className="flex gap-4">
+          <ActivityImage src={item.image} alt={item.title} />
+
+          <div className="min-w-0">
+            <h3 className="truncate text-[28px] font-bold leading-tight text-[#1f2937]">
+              {item.title}
+            </h3>
+            <p className="mt-1 text-lg text-[#6b7280]">{item.category}</p>
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-4 xl:space-y-0">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            <div className="grid flex-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+              <Metric label="Live Bid" value={formatMoney(item.currentBid)} />
+              <Metric label="Your Bid" value={formatMoney(item.yourBid)} highlight="green" />
+              <Metric
+                label={item.isLeading ? "Minimum Next Bid" : "Outbid By"}
+                value={formatMoney(item.isLeading ? item.minimumNextBid : item.outbidBy)}
+              />
+              <Metric label="Time Left" value={getTimeUntil(item.endsAt ?? undefined)} />
+              <Metric label="Bids" value={String(item.totalBids)} />
+            </div>
+
+            <div className="space-y-3 xl:w-[165px]">
+              <div className={`rounded-lg border px-3 py-2 text-xs font-semibold ${statusTone}`}>
+                {item.isLeading ? "You're in the lead" : "You've been outbid"}
+              </div>
+              <Button asChild className="h-12 w-full rounded-md bg-[#fe6819] text-base font-bold hover:bg-[#e45c12]">
+                <Link href={item.auctionId ? `/auctions-details/${item.auctionId}` : "/category"}>
+                  Increase Bid
+                </Link>
+              </Button>
+              <p className="text-center text-[10px] text-[#6b7280]">
+                Min. increase {formatMoney(item.minimumNextBid - item.currentBid)}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-      <p className="mt-4 text-sm text-[#6b7280]">{hint}</p>
+    </article>
+  );
+}
+
+function WonCard({ item }: { item: DashboardAuctionWonItem }) {
+  return (
+    <article className="rounded-lg border border-[#dce6f5] bg-white p-4">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
+        <div className="flex gap-4">
+          <ActivityImage src={item.image} alt={item.title} />
+
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-md bg-[#ecfdf5] px-3 py-1 text-xs font-semibold text-[#059669]">
+              <Trophy className="h-3.5 w-3.5" />
+              YOU WON
+            </div>
+            <h3 className="mt-3 text-2xl font-bold text-[#111827]">{item.title}</h3>
+            <p className="mt-1 text-base text-[#6b7280]">{item.category}</p>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Metric label="Winning Bid" value={formatMoney(item.winningBid)} />
+            <Metric label="Winning Date" value={formatCompactDate(item.winningDate)} />
+            <StatusMetric label="Payment Status" value={formatStatusLabel(item.paymentStatus)} />
+            <StatusMetric label="Pickup Status" value={formatStatusLabel(item.pickupStatus)} />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 xl:w-[165px]">
+          {item.invoiceId ? (
+            <Button asChild className="h-12 rounded-md bg-[#fe6819] hover:bg-[#e45c12]">
+              <Link href={`/dashboard/invoices/${item.invoiceId}`}>View Invoice</Link>
+            </Button>
+          ) : null}
+          <Button asChild variant="outline" className="h-12 rounded-md border-[#dce6f5]">
+            <Link href="/dashboard/invoices">Manage Pickup</Link>
+          </Button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function LostCard({ item }: { item: DashboardAuctionLostItem }) {
+  return (
+    <article className="rounded-lg border border-[#dce6f5] bg-white p-4">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
+        <div className="flex gap-4">
+          <ActivityImage src={item.image} alt={item.title} />
+
+          <div>
+            <div className="inline-flex rounded-md bg-[#fff1f2] px-3 py-1 text-xs font-semibold text-[#dc2626]">
+              Lose
+            </div>
+            <h3 className="mt-3 text-2xl font-bold text-[#111827]">{item.title}</h3>
+            <p className="mt-1 text-base text-[#6b7280]">{item.category}</p>
+          </div>
+        </div>
+
+        <div className="flex-1">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Metric label="Your Final Bid" value={formatMoney(item.yourFinalBid)} />
+            <Metric label="Winning Bid" value={formatMoney(item.winningBid)} />
+            <Metric label="Ended On" value={formatCompactDate(item.endedOn)} />
+          </div>
+        </div>
+
+        <Button asChild variant="outline" className="h-12 rounded-md border-[#dce6f5] xl:w-[130px]">
+          <Link href={item.auctionId ? `/auctions-details/${item.auctionId}` : "/category"}>
+            View Item
+          </Link>
+        </Button>
+      </div>
+    </article>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  highlight?: "green";
+}) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.02em] text-[#434653]">
+        {label}
+      </p>
+      <p className={`mt-1 text-[20px] font-extrabold text-[#1a1b22] ${highlight === "green" ? "text-[#059669]" : ""}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function StatusMetric({ label, value }: { label: string; value: string }) {
+  const tone =
+    value.toLowerCase().includes("paid") || value.toLowerCase().includes("ready")
+      ? "bg-[#ecfdf5] text-[#15803d]"
+      : value.toLowerCase().includes("pending")
+        ? "bg-[#fff7ed] text-[#ea580c]"
+        : "bg-[#f3f4f6] text-[#4b5563]";
+
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.02em] text-[#434653]">
+        {label}
+      </p>
+      <span className={`mt-1 inline-flex rounded-full px-3 py-1 text-sm font-semibold ${tone}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function ActivitySection({
+  tab,
+  active,
+  won,
+  lost,
+}: {
+  tab: DashboardTab;
+  active: DashboardAuctionActiveItem[];
+  won: DashboardAuctionWonItem[];
+  lost: DashboardAuctionLostItem[];
+}) {
+  if (tab === "active") {
+    if (!active.length) return <EmptyActivityState />;
+    return (
+      <div className="space-y-4">
+        {active.map((item) => (
+          <ActiveBidCard key={item.auctionProductId} item={item} />
+        ))}
+      </div>
+    );
+  }
+
+  if (tab === "won") {
+    if (!won.length) {
+      return (
+        <div className="rounded-lg border border-[#dce6f5] bg-white px-4 py-16 text-center text-[#737373]">
+          No won auctions yet.
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {won.map((item) => (
+          <WonCard key={item.auctionProductId} item={item} />
+        ))}
+      </div>
+    );
+  }
+
+  if (!lost.length) {
+    return (
+      <div className="rounded-lg border border-[#dce6f5] bg-white px-4 py-16 text-center text-[#737373]">
+        No lost auctions yet.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {lost.map((item) => (
+        <LostCard key={item.auctionProductId} item={item} />
+      ))}
     </div>
   );
 }
 
 export function DashboardOverview() {
   const profile = useDashboardProfile();
+  const auctionActivity = useDashboardAuctionActivity();
   const invoices = useDashboardInvoices();
-  const appointments = useDashboardAppointments();
-  const readyInvoices = useDashboardReadyInvoices();
+  const [tab, setTab] = useState<DashboardTab>("active");
+  const [notifications, setNotifications] = useState({
+    losing: true,
+    winning: true,
+  });
 
-  const isLoading =
-    profile.isLoading ||
-    invoices.isLoading ||
-    appointments.isLoading ||
-    readyInvoices.isLoading;
+  const isLoading = profile.isLoading || auctionActivity.isLoading || invoices.isLoading;
+
+  const invoiceCount = useMemo(() => invoices.data?.length ?? 0, [invoices.data]);
 
   if (isLoading) {
     return (
-      <DashboardShell
-        title="Dashboard"
-        description="Track invoices, pickup readiness, and the actions that move an order from win to collection."
-      >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-44 rounded-2xl" />
+      <DashboardShell title="My Dashboard" description="Preparing your auction activity and invoice summary.">
+        <div className="grid gap-4 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="h-[129px] rounded-lg" />
           ))}
         </div>
-        <Skeleton className="h-72 rounded-2xl" />
-        <Skeleton className="h-72 rounded-2xl" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="h-[117px] rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="h-[280px] rounded-lg" />
+        <Skeleton className="h-[100px] rounded-lg" />
       </DashboardShell>
     );
   }
 
-  if (profile.isError || invoices.isError || appointments.isError || readyInvoices.isError) {
+  if (profile.isError || auctionActivity.isError || invoices.isError || !profile.data || !auctionActivity.data) {
     return (
-      <DashboardShell
-        title="Dashboard"
-        description="Track invoices, pickup readiness, and the actions that move an order from win to collection."
-      >
-        <div className="rounded-2xl border border-[#fecaca] bg-[#fff7f7] p-6 text-[#991b1b]">
-          We couldn&apos;t load your dashboard right now. Please refresh and try again.
+      <DashboardShell title="My Dashboard" description="We couldn't load your dashboard activity right now.">
+        <div className="rounded-lg border border-[#fecaca] bg-[#fff7f7] p-6 text-[#991b1b]">
+          Please refresh and try again.
         </div>
       </DashboardShell>
     );
   }
 
-  const orders = mapOrders(invoices.data, appointments.data);
-  const recentOrders = orders.slice(0, 3);
-  const nextAppointment = appointments.data?.find(
-    (appointment) => appointment.status === "scheduled",
-  );
-  const paidInvoices = invoices.data?.filter((invoice) => invoice.status === "paid") ?? [];
-  const profileCompletion = getProfileCompletion(profile.data);
+  const { summary, active, won, lost } = auctionActivity.data;
+  const welcomeName = profile.data.firstName || profile.data.lastName
+    ? `${profile.data.firstName ?? ""} ${profile.data.lastName ?? ""}`.trim()
+    : profile.data.email;
 
   return (
     <DashboardShell
-      title="Dashboard"
-      description="Track invoices, pickup readiness, and the actions that move an order from win to collection."
+      title="My Dashboard"
+      description={`Welcome back, ${welcomeName}`}
       action={
-        <Button asChild className="h-11 rounded-xl bg-[#fe6819] px-5 hover:bg-[#e45c12]">
-          <Link href="/dashboard/orders">View all orders</Link>
+        <Button asChild size="icon" variant="ghost" className="h-10 w-10 rounded-full border border-transparent text-[#171717] hover:bg-white">
+          <Link href="/dashboard/profile" aria-label="Open account settings">
+            <Settings className="h-5 w-5" />
+          </Link>
         </Button>
       }
     >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Paid invoices"
-          value={String(paidInvoices.length)}
-          hint="Completed auction purchases waiting in your order history."
-          tone="orange"
-          icon={CreditCard}
-        />
-        <StatCard
-          label="Ready for pickup"
-          value={String(readyInvoices.data?.length ?? 0)}
-          hint="Orders you can schedule into an available pickup slot."
-          tone="green"
-          icon={Package}
-        />
-        <StatCard
-          label="Scheduled pickups"
-          value={String(
-            appointments.data?.filter((appointment) => appointment.status === "scheduled").length ?? 0,
-          )}
-          hint="Upcoming appointments already reserved with the warehouse."
-          tone="blue"
-          icon={CalendarClock}
-        />
-        <StatCard
-          label="Profile completion"
-          value={`${profileCompletion}%`}
-          hint="Complete profile details help invoices and pickup handoff stay smooth."
-          tone="slate"
-          icon={UserCircle2}
-        />
-      </div>
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-3">
+          <SummaryCard label="Active Bids" value={summary.active} tone="orange" icon={Gavel} />
+          <SummaryCard label="Won" value={summary.won} tone="green" icon={Trophy} />
+          <SummaryCard label="Lost" value={summary.lost} tone="red" icon={XCircle} />
+        </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-        <section className="rounded-2xl border border-[#dce6f5] bg-[#f8fbff] p-5">
-          <div className="flex items-center justify-between gap-4">
+        <div className="grid gap-4 md:grid-cols-3">
+          <QuickActionCard href="/category" label="Auctions" tone="orange" icon={Gavel} caption="Browse live lots" />
+          <QuickActionCard href="/dashboard/wishlist" label="Wishlist" tone="red" icon={Heart} caption="Saved items" />
+          <QuickActionCard href="/dashboard/invoices" label="Invoices" tone="blue" icon={FileText} caption={`${invoiceCount} total`} />
+        </div>
+
+        <div className="border-b border-[#dce6f5] pb-2">
+          <div className="flex flex-wrap gap-3">
+            <TabButton active={tab === "active"} label="Active Bids" count={summary.active} icon={Gavel} onClick={() => setTab("active")} />
+            <TabButton active={tab === "won"} label="Won" count={summary.won} icon={Hourglass} onClick={() => setTab("won")} />
+            <TabButton active={tab === "lost"} label="Lost" count={summary.lost} icon={TriangleAlert} onClick={() => setTab("lost")} />
+          </div>
+        </div>
+
+        <ActivitySection tab={tab} active={active} won={won} lost={lost} />
+
+        <section className="rounded-lg border border-[#dce6f5] bg-white p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-[#111827]">Recent order activity</h2>
-              <p className="mt-1 text-sm text-[#6b7280]">
-                The latest wins, invoice states, and pickup progress across your account.
+              <h2 className="text-[18px] font-semibold text-[#171717]">My History</h2>
+              <p className="mt-1 text-base text-[#737373]">
+                View and manage your previous activities, records, and interactions in one place.
               </p>
             </div>
-            <Button asChild variant="outline" className="rounded-xl border-[#dce6f5]">
-              <Link href="/dashboard/orders">History</Link>
+            <Button asChild variant="outline" className="rounded-[10px] border-[rgba(0,0,0,0.1)]">
+              <Link href="/dashboard/invoices">View All</Link>
             </Button>
-          </div>
-
-          <div className="mt-5 space-y-4">
-            {recentOrders.length ? (
-              recentOrders.map((order) => (
-                <Link
-                  key={order.invoice._id}
-                  href={`/dashboard/orders/${order.invoice._id}`}
-                  className="block rounded-2xl border border-[#dce6f5] bg-white p-4 transition hover:border-[#ffb86a]"
-                >
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="h-20 w-20 overflow-hidden rounded-2xl bg-[#f3f4f6]">
-                        {order.invoice.product?.images?.[0]?.url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={order.invoice.product.images[0].url}
-                            alt={order.invoice.product.title}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : null}
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6b7280]">
-                          {order.invoice.inventoryId}
-                        </p>
-                        <h3 className="mt-1 text-lg font-semibold text-[#111827]">
-                          {order.invoice.product?.title ?? "Auction item"}
-                        </h3>
-                        <p className="mt-1 text-sm text-[#6b7280]">
-                          {order.invoice.product?.category ?? "Category unavailable"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-3 lg:min-w-[420px]">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6b7280]">
-                          Invoice
-                        </p>
-                        <p className="mt-1 font-semibold text-[#111827]">
-                          {order.invoice.invoiceNumber}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6b7280]">
-                          Amount
-                        </p>
-                        <p className="mt-1 font-semibold text-[#111827]">
-                          {formatMoney(order.invoice.amount)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6b7280]">
-                          Pickup
-                        </p>
-                        <p className="mt-1 font-semibold text-[#111827]">
-                          {order.pickupStatusLabel}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="rounded-2xl border border-dashed border-[#dce6f5] bg-white p-8 text-center">
-                <p className="text-lg font-semibold text-[#111827]">No order activity yet</p>
-                <p className="mt-2 text-sm text-[#6b7280]">
-                  As soon as you win and pay for an auction, it will show up here.
-                </p>
-              </div>
-            )}
           </div>
         </section>
 
-        <div className="space-y-6">
-          <section className="rounded-2xl border border-[#dce6f5] bg-white p-5">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-[#00a63e]" />
-              <h2 className="text-xl font-semibold text-[#111827]">Next best action</h2>
+        <section className="rounded-lg border border-[#dce6f5] bg-white p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-2">
+              <Bell className="h-5 w-5 text-[#ff6900]" />
+              <h2 className="text-[18px] font-semibold text-[#171717]">Notification Preferences</h2>
             </div>
-            {readyInvoices.data?.length ? (
-              <div className="mt-4 rounded-2xl border border-[#b7efcd] bg-[#effcf4] p-4">
-                <p className="text-sm font-semibold text-[#111827]">
-                  {readyInvoices.data.length} order
-                  {readyInvoices.data.length > 1 ? "s are" : " is"} ready for scheduling
-                </p>
-                <p className="mt-2 text-sm text-[#4b5563]">
-                  Choose a pickup window so the warehouse can prepare your handoff.
-                </p>
-                <Button asChild className="mt-4 h-10 rounded-xl bg-[#fe6819] hover:bg-[#e45c12]">
-                  <Link href="/dashboard/orders">Schedule pickup</Link>
-                </Button>
-              </div>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-[#dce6f5] bg-[#f8fbff] p-4">
-                <p className="text-sm font-semibold text-[#111827]">Nothing is waiting on you right now</p>
-                <p className="mt-2 text-sm text-[#6b7280]">
-                  You&apos;re all caught up. We&apos;ll surface the next warehouse step here when it&apos;s available.
-                </p>
-              </div>
-            )}
-          </section>
+            <Button asChild variant="outline" className="rounded-[10px] border-[#ffb86a] text-[#ff6900] hover:text-[#ff6900]">
+              <Link href="/dashboard/profile">Manage All</Link>
+            </Button>
+          </div>
 
-          <section className="rounded-2xl border border-[#dce6f5] bg-white p-5">
-            <div className="flex items-center gap-3">
-              <CalendarClock className="h-5 w-5 text-[#003da5]" />
-              <h2 className="text-xl font-semibold text-[#111827]">Upcoming pickup</h2>
-            </div>
-            {nextAppointment ? (
-              <div className="mt-4 space-y-3 rounded-2xl border border-[#dce6f5] bg-[#f8fbff] p-4">
-                <p className="text-sm font-medium text-[#111827]">{formatSlotWindow(nextAppointment.slot)}</p>
-                <p className="text-sm text-[#6b7280]">
-                  Appointment created {formatDateTime(nextAppointment.createdAt)}
-                </p>
-                <p className="text-sm text-[#6b7280]">
-                  Pickup code: <span className="font-semibold text-[#111827]">{nextAppointment.pickupCode}</span>
-                </p>
-              </div>
-            ) : (
-              <div className="mt-4 rounded-2xl border border-dashed border-[#dce6f5] p-4 text-sm text-[#6b7280]">
-                No appointment is booked yet.
-              </div>
-            )}
-          </section>
+          <div className="mt-6 space-y-3">
+            {[
+              {
+                key: "losing" as const,
+                title: "Losing Alerts",
+                description: "Notify me when I'm losing on an item",
+              },
+              {
+                key: "winning" as const,
+                title: "Win Alerts",
+                description: "Notify me when I win an auction",
+              },
+            ].map((item) => (
+              <div
+                key={item.key}
+                className="flex items-center justify-between rounded-[10px] bg-[#fafafa] px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[#ffedd4] text-[#ff6900]">
+                    <Bell className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#171717]">{item.title}</p>
+                    <p className="text-xs text-[#737373]">{item.description}</p>
+                  </div>
+                </div>
 
-          <section className="rounded-2xl border border-[#dce6f5] bg-white p-5">
-            <div className="flex items-center gap-3">
-              <AlertCircle className="h-5 w-5 text-[#fe6819]" />
-              <h2 className="text-xl font-semibold text-[#111827]">Account snapshot</h2>
-            </div>
-            <dl className="mt-4 space-y-3 text-sm">
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-[#6b7280]">Email verification</dt>
-                <dd className="font-semibold text-[#111827]">
-                  {profile.data?.isVerified ? "Verified" : "Pending"}
-                </dd>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={notifications[item.key]}
+                  onClick={() => {
+                    setNotifications((current) => ({
+                      ...current,
+                      [item.key]: !current[item.key],
+                    }));
+                    toast.success(`${item.title} ${notifications[item.key] ? "disabled" : "enabled"}.`);
+                  }}
+                  className={`relative h-6 w-11 rounded-full transition ${
+                    notifications[item.key] ? "bg-[#ff8904]" : "bg-[#d4d4d8]"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                      notifications[item.key] ? "left-[22px]" : "left-0.5"
+                    }`}
+                  />
+                </button>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-[#6b7280]">Saved payment method</dt>
-                <dd className="font-semibold text-[#111827]">
-                  {profile.data?.hasDefaultPaymentMethod ? "Available" : "Not added"}
-                </dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-[#6b7280]">Member since</dt>
-                <dd className="font-semibold text-[#111827]">
-                  {profile.data?.createdAt ? formatDateTime(profile.data.createdAt) : "Unknown"}
-                </dd>
-              </div>
-            </dl>
-          </section>
-        </div>
+            ))}
+          </div>
+
+          <p className="mt-4 text-xs text-[#94a3b8]">
+            Notification toggles are currently local UI controls until a preference API is added.
+          </p>
+        </section>
       </div>
     </DashboardShell>
   );

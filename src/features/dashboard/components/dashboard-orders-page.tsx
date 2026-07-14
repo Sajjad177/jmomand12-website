@@ -76,8 +76,8 @@ export function DashboardOrdersPage() {
 
   return (
     <DashboardShell
-      title="Orders & invoices"
-      description="Review wins, payment state, and pickup progress across the full post-auction journey."
+      title="Invoices"
+      description="Review invoice status, payment completion, and pickup scheduling across your wins."
       action={
         <div className="rounded-2xl border border-[#dce6f5] bg-[#f8fbff] px-4 py-3 text-sm text-[#6b7280]">
           Ready to schedule: <span className="font-semibold text-[#111827]">{readyInvoices.data?.length ?? 0}</span>
@@ -118,7 +118,7 @@ export function DashboardOrdersPage() {
           </div>
         ) : isError ? (
           <div className="rounded-2xl border border-[#fecaca] bg-[#fff7f7] p-6 text-[#991b1b]">
-            We couldn&apos;t load your orders right now.
+            We couldn&apos;t load your invoices right now.
           </div>
         ) : paginatedOrders.length ? (
           <div className="space-y-4">
@@ -213,7 +213,7 @@ export function DashboardOrdersPage() {
                         variant="outline"
                         className="h-12 rounded-xl border-[#fe6819] text-[#fe6819] hover:bg-[#fff3eb] hover:text-[#fe6819]"
                       >
-                        <Link href={`/dashboard/orders/${order.invoice._id}`}>
+                        <Link href={`/dashboard/invoices/${order.invoice._id}`}>
                           {order.invoice.status === "paid" ? "View invoice" : "View details"}
                         </Link>
                       </Button>
@@ -280,7 +280,7 @@ export function DashboardOrdersPage() {
         ) : (
           <div className="rounded-2xl border border-dashed border-[#dce6f5] bg-white p-10 text-center">
             <PackageSearch className="mx-auto h-10 w-10 text-[#94a3b8]" />
-            <p className="mt-4 text-xl font-semibold text-[#111827]">No matching orders</p>
+            <p className="mt-4 text-xl font-semibold text-[#111827]">No matching invoices</p>
             <p className="mt-2 text-sm text-[#6b7280]">
               Once invoices are created for your account, they&apos;ll appear here with pickup actions.
             </p>

@@ -59,7 +59,7 @@ export function DashboardOrderDetailPage({ invoiceId }: { invoiceId: string }) {
             The invoice may not belong to this account, or it may no longer be available from the current API response.
           </p>
           <Button asChild className="mt-6 rounded-xl bg-[#fe6819] hover:bg-[#e45c12]">
-            <Link href="/dashboard/orders">Back to orders</Link>
+            <Link href="/dashboard/invoices">Back to invoices</Link>
           </Button>
         </div>
       </DashboardShell>
@@ -108,9 +108,9 @@ export function DashboardOrderDetailPage({ invoiceId }: { invoiceId: string }) {
       description="Review invoice status, pickup readiness, and the exact handoff timeline for this order."
       action={
         <Button asChild variant="outline" className="rounded-xl border-[#dce6f5]">
-          <Link href="/dashboard/orders">
+          <Link href="/dashboard/invoices">
             <ArrowLeft className="h-4 w-4" />
-            Back to orders
+            Back to invoices
           </Link>
         </Button>
       }

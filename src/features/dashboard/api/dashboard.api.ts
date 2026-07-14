@@ -1,11 +1,13 @@
 import { api } from "@/lib/api";
 import type {
   ApiResponse,
+  DashboardAuctionActivity,
   Invoice,
   PickupAppointment,
   PickupSlot,
   UpdateProfilePayload,
   UserProfile,
+  WishlistItem,
 } from "../types";
 
 export async function getMyProfile() {
@@ -42,6 +44,11 @@ export async function getMyInvoices() {
   return response.data.data;
 }
 
+export async function getMyDashboardAuctionActivity() {
+  const response = await api.get<ApiResponse<DashboardAuctionActivity>>("/bid/me/dashboard");
+  return response.data.data;
+}
+
 export async function getMyPickupAppointments() {
   const response = await api.get<ApiResponse<PickupAppointment[]>>("/pickups/me");
   return response.data.data;
@@ -55,6 +62,15 @@ export async function getMyReadyInvoices() {
 export async function getAvailablePickupSlots() {
   const response = await api.get<ApiResponse<PickupSlot[]>>("/pickups/slots");
   return response.data.data;
+}
+
+export async function getMyWishlist() {
+  const response = await api.get<ApiResponse<WishlistItem[]>>("/carts/wishlist");
+  return response.data.data;
+}
+
+export async function removeWishlistItem(wishlistItemId: string) {
+  await api.delete<ApiResponse<null>>(`/carts/${wishlistItemId}`);
 }
 
 export async function schedulePickup(payload: {
