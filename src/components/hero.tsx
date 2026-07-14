@@ -4,23 +4,17 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section
-      className="relative overflow-hidden bg-cover bg-center"
-      style={{
-        backgroundImage: "url('/hero-bg.png')",
-      }}
-    >
-      {/* Overlay */}
-      <div className="pointer-events-none absolute inset-0" />
+    <section className="relative overflow-hidden bg-blue-800">
+      {/* Removed empty overlay — add one with actual content if needed, e.g. a gradient */}
 
-      <div className="container relative mx-auto flex items-center justify-between px-6 py-32 lg:px-8">
+      <div className="container relative mx-auto flex items-center justify-between px-6 py-16 lg:px-8">
         {/* Left Content */}
         <div className="max-w-3xl">
           <p className="mb-4 text-lg uppercase tracking-[0.3em] text-gray-200">
             Welcome to Discount Deals
           </p>
 
-          <h1 className="text-5xl font-bold leading-tight text-white md:text-7xl xl:text-8xl">
+          <h1 className="text-5xl font-bold leading-none text-white md:text-7xl xl:text-8xl">
             Bid Smarter.
             <br />
             <span className="text-orange-500">Win Bigger.</span>
@@ -51,10 +45,15 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Floating Cards */}
-        <div className="hidden xl:block">
-          {/* Timer */}
-          <div className="absolute right-[32rem] top-40 rounded-xl border border-white/20 bg-white/20 p-6 backdrop-blur-md">
+        {/* Floating Cards — now has explicit dimensions so background + absolute children render */}
+        <div
+          className="relative hidden h-[700px] w-[1000px] bg-contain bg-center bg-no-repeat xl:block"
+          style={{
+            backgroundImage: "url('/Hero-Section-bg.png')",
+          }}
+        >
+          {/* Timer — repositioned to top-left of the container */}
+          <div className="absolute left-0 top-20 rounded-xl border border-white/20 bg-white/20 p-6 backdrop-blur-md">
             <p className="mb-4 text-sm font-bold uppercase text-white">
               Auction Closing
             </p>
@@ -81,19 +80,19 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Product Card */}
-          <div className="absolute right-24 top-40 rounded-xl border border-white/20 bg-white/30 p-5 backdrop-blur-md">
+          {/* Product Card — top-right */}
+          <div className="absolute right-8 top-40 rounded-xl border border-white/20 bg-white/30 p-5 backdrop-blur-md">
             <p className="text-sm font-semibold text-white">John D. Wm</p>
 
             <h4 className="mt-2 text-lg font-bold text-white">
               Samsung 55&quot; TV
             </h4>
 
-            <p className="mt-2 text-orange-400 font-bold">$180</p>
+            <p className="mt-2 font-bold text-orange-400">$180</p>
           </div>
 
-          {/* Live Bid */}
-          <div className="absolute bottom-32 right-24 rounded-xl border border-white/20 bg-white/30 p-6 backdrop-blur-md">
+          {/* Live Bid — bottom-right */}
+          <div className="absolute bottom-16 right-8 rounded-xl border border-white/20 bg-white/30 p-6 backdrop-blur-md">
             <p className="text-sm font-semibold uppercase text-white">
               Live Bid
             </p>
