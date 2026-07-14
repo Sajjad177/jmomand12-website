@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardShell } from "./dashboard-shell";
 import { useDashboardProfile, useUpdateDashboardProfile } from "../hooks/useDashboardData";
 import { formatDateTime } from "../utils";
+import { PaymentMethodDialog } from "@/features/payments/components/payment-method-dialog";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -34,6 +35,7 @@ export function DashboardProfilePage() {
   const updateProfile = useUpdateDashboardProfile();
   const { update: updateSession } = useSession();
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
   const defaultValues = useMemo<ProfileFormValues>(
     () => ({
@@ -247,7 +249,7 @@ export function DashboardProfilePage() {
               <h2 className="text-2xl font-semibold text-[#111827]">Payment readiness</h2>
             </div>
             <p className="mt-2 text-sm text-[#6b7280]">
-              The current backend exposes whether a default payment method exists, but not full card-list management yet.
+              Save a default card before bidding so auction wins can be charged automatically when the sale closes.
             </p>
             <div className="mt-5 rounded-2xl border border-[#dce6f5] bg-[#f8fbff] p-5">
               <p className="text-sm text-[#6b7280]">Default payment method</p>
@@ -257,8 +259,24 @@ export function DashboardProfilePage() {
               <p className="mt-2 text-sm text-[#6b7280]">
                 {profile.data.defaultPaymentMethodId
                   ? `Stored payment ID: ${profile.data.defaultPaymentMethodId}`
-                  : "When the payment-management API expands, this section can support add, remove, and default-card flows directly."}
+                  : "Add a default payment method now to avoid interruption when you place your first live bid."}
               </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  className="rounded-xl bg-[#003da5] hover:bg-[#00358e]"
+                  onClick={() => setPaymentDialogOpen(true)}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  {profile.data.hasDefaultPaymentMethod ? "Update payment method" : "Add payment method"}
+                </Button>
+                {profile.data.hasDefaultPaymentMethod ? (
+                  <div className="inline-flex items-center gap-2 rounded-xl border border-[#d1fae5] bg-[#ecfdf5] px-4 py-2 text-sm font-medium text-[#047857]">
+                    <LockKeyhole className="h-4 w-4" />
+                    Bidding is enabled on auction lots
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
 
@@ -279,6 +297,16 @@ export function DashboardProfilePage() {
           </div>
         </section>
       </div>
+
+      <PaymentMethodDialog
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+        title="Manage your default payment method"
+        description="Save the card you want to use for auction wins. We&apos;ll refresh your payment readiness as soon as Stripe confirms it."
+        onSuccess={async () => {
+          await profile.refetch();
+        }}
+      />
     </DashboardShell>
   );
 }
