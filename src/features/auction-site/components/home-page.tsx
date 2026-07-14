@@ -60,7 +60,7 @@ export function HomePage() {
       <StatsSection />
       <UpcomingAuctions />
       <WhyChooseUs />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <CTASection />
     </main>
   );
