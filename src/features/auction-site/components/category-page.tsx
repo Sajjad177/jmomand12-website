@@ -4,8 +4,10 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { Search, ChevronUp, Star, Filter, Loader2 } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Search, ChevronUp, Star, Filter, Loader2, Heart } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 // --- Static Meta Configuration matching backend schema limits ---
 const categories = [
@@ -77,6 +79,9 @@ interface BrowseResponse {
 
 export default function AuctionListingPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const token = session?.accessToken;
+  const queryClient = useQueryClient();
 
   // --- Search & Filter States ---
   const [searchInput, setSearchInput] = useState(""); // Local input state
@@ -149,6 +154,39 @@ export default function AuctionListingPage() {
   const products = response?.data || [];
   const meta = response?.meta;
 
+  // --- Wishlist Mutation ---
+  const addToWishlistMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      if (!token) throw new Error("Please log in to add items to your wishlist.");
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/carts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          productId: productId,
+          type: "wishlist",
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || result.success === false) {
+        throw new Error(result.message || "Failed to add product to wishlist.");
+      }
+      return result;
+    },
+    onSuccess: (_, productId) => {
+      const product = products.find(p => p._id === productId);
+      toast.success(`${product?.title || "Product"} added to wishlist successfully!`);
+      queryClient.invalidateQueries({ queryKey: ["wishlistItems"] });
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Add to wishlist failed.");
+    },
+  });
+
   // --- Handlers ---
   const handleCheckboxChange = (
     id: string,
@@ -179,6 +217,11 @@ export default function AuctionListingPage() {
     e.preventDefault();
     setSearchTerm(searchInput);
     setCurrentPage(1);
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent, productId: string) => {
+    e.stopPropagation(); // Prevent card click navigation
+    addToWishlistMutation.mutate(productId);
   };
 
   return (
@@ -395,8 +438,20 @@ export default function AuctionListingPage() {
                     return (
                       <div 
                         key={product._id} 
-                        className="group flex flex-col overflow-hidden rounded-[8px] border border-[#dce6f5] bg-white shadow-sm transition-all hover:shadow-md"
+                        className="group flex flex-col overflow-hidden rounded-[8px] border border-[#dce6f5] bg-white shadow-sm transition-all hover:shadow-md relative"
                       >
+                        {/* Wishlist Icon - Only for For Sale products */}
+                        {isForSale && (
+                          <button
+                            onClick={(e) => handleWishlistClick(e, product._id)}
+                            disabled={addToWishlistMutation.isPending}
+                            className="absolute right-3 top-3 z-20 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Add to Wishlist"
+                          >
+                            <Heart className="h-4 w-4 text-gray-600 hover:text-red-500 transition-colors" />
+                          </button>
+                        )}
+
                         {/* Thumbnail wrapper */}
                         <div className="relative h-[200px] w-full bg-[#f8fafc] p-4 flex items-center justify-center">
                           <span className={`absolute left-3 top-3 z-10 rounded px-2 py-0.5 text-[9px] font-bold uppercase text-white ${

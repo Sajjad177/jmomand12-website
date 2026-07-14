@@ -85,7 +85,7 @@ export default function FeaturedProducts() {
           </h2>
 
           <Link
-            href="/products"
+            href="/category"
             className="inline-flex w-fit items-center rounded border border-orange-500 px-8 py-4 font-semibold text-orange-500 transition hover:bg-orange-500 hover:text-white"
           >
             View All
