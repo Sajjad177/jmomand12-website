@@ -53,7 +53,7 @@ interface CartItem {
   updatedAt: string;
 }
 
-interface CartApiResponse {
+export interface CartApiResponse {
   success: boolean;
   message: string;
   statusCode: number;
@@ -218,7 +218,7 @@ const netGrandTotal = cartItems.reduce(
             {cartItems.length === 0 ? (
               <div className="rounded-xl border border-[#dce6f5] bg-white p-12 text-center">
                 <p className="text-slate-400 font-medium text-sm">Your active shopping cart is empty.</p>
-                <Link href="/products" className="mt-4 inline-flex px-6 py-2.5 bg-[#003da5] text-white text-xs font-bold rounded hover:bg-[#002b75] transition-all">
+                <Link href="/category" className="mt-4 inline-flex px-6 py-2.5 bg-[#003da5] text-white text-xs font-bold rounded hover:bg-[#002b75] transition-all">
                   Continue Shopping
                 </Link>
               </div>
@@ -415,7 +415,7 @@ const netGrandTotal = cartItems.reduce(
                   </button>
                   
                   <Link
-                    href="/products"
+                    href="/category"
                     className="w-full h-11 border border-[#dce6f5] hover:bg-slate-50 text-slate-700 font-bold text-sm rounded transition-all flex items-center justify-center bg-white"
                   >
                     Continue Shopping

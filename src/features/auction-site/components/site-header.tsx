@@ -6,9 +6,38 @@ import { Check, Heart, Menu, Search, ShoppingCart } from "lucide-react";
 import AuthStatusButton from "@/features/auth/components/AuthStatusButton";
 import { SearchModal } from "@/features/search/components/search-modal";
 import { SiteBrand } from "./site-brand";
+import { useQuery } from "@tanstack/react-query";
+import { CartApiResponse } from "@/app/(website)/cart/_components/product-cart";
+import { useSession } from "next-auth/react";
+import { useDashboardWishlist } from "@/features/dashboard/hooks/useDashboardData";
 
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
+  const wishlist = useDashboardWishlist();
+  const items = wishlist.data ?? [];
+  console.log(items);
+  const { data: session } = useSession();
+  const token = session?.accessToken;
+
+  const { data: response } = useQuery<CartApiResponse>({
+    queryKey: ["userCartData"],
+    queryFn: async () => {
+      if (!token) throw new Error("Authentication token not identified.");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/carts/cart`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const result = await res.json();
+      if (!res.ok || result.success === false) {
+        throw new Error(result.message || "Failed to retrieve cart items.");
+      }
+      return result;
+    },
+    enabled: !!token,
+  });
+
+  const cartItems = response?.data || [];
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -77,17 +106,28 @@ export function SiteHeader() {
               </Link>
               <Link
                 href="/cart"
-                className="flex h-11 items-center gap-2 rounded-[6px] bg-white px-4 text-[13px] font-medium text-[#111827]"
+                className="flex h-11 items-center gap-2 rounded-lg bg-white px-4 text-sm font-medium text-[#111827] shadow-sm transition-all hover:bg-gray-50 hover:shadow-md"
               >
                 <ShoppingCart className="h-4 w-4" />
-                Cart
-                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#fe6819] px-1 text-[10px] text-white">
-                  2
+                <span>Cart</span>
+
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#fe6819] px-1.5 text-[10px] font-semibold text-white">
+                  {cartItems.length}
                 </span>
               </Link>
-              <button className="flex h-11 w-11 items-center justify-center rounded-[6px] bg-white text-[#111827]">
-                <Heart className="h-4 w-4" />
-              </button>
+
+              <Link
+                href="/dashboard/wishlist"
+                className="relative flex h-11 w-11 items-center justify-center rounded-lg bg-white text-[#111827] shadow-sm transition-all hover:bg-gray-50 hover:shadow-md"
+              >
+                <Heart className="h-5 w-5" />
+
+                {items?.length > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#fe6819] px-1 text-[10px] font-semibold text-white">
+                    {items.length}
+                  </span>
+                )}
+              </Link>
               <AuthStatusButton />
             </div>
           </div>

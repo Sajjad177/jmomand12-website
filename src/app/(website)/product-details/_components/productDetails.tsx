@@ -120,7 +120,7 @@ export default function ProductDetailsPage() {
     },
     onSuccess: () => {
       toast.success(`${product?.title} added to cart successfully!`);
-      queryClient.invalidateQueries({ queryKey: ["cartItems"] }); // If you have cart header query
+      queryClient.invalidateQueries({ queryKey: ["userCartData"] }); // If you have cart header query
     },
     onError: (err: any) => {
       toast.error(err.message || "Add to cart failed.");

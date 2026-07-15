@@ -29,7 +29,7 @@ export default function CTASection() {
 
             <div className="mt-10">
               <Link
-                href="/auctions"
+                href="/category"
                 className="inline-flex items-center justify-center rounded-sm bg-orange-500 px-8 py-4 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:bg-orange-600 hover:scale-105"
               >
                 Join Auctions Now
