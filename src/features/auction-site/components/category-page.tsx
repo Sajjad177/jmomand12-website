@@ -10,10 +10,9 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 // --- Static Meta Configuration matching backend schema limits ---
-const categories = [
-  "All Products", "T SHIRT", "Appliances", "Electronics", "Furniture", 
-  "Home & Garden", "Tools", "Outdoor", "Office Furniture", "Bedding & Decor"
-];
+
+// Categories will be fetched dynamically
+// const categories = [ ... ]; // REMOVED static categories
 
 const retailValues = [
   { id: "under-100", label: "Under $100", apiValue: "under-100" },
@@ -33,8 +32,10 @@ const statuses = [
 const conditions = [
   { id: "new", label: "Brand New" },
   { id: "like_new", label: "Like New / Open Box" },
-  { id: "scratch_dent", label: "Scratch & Dent" },
-  { id: "salvage", label: "Salvage" },
+  { id: "open box", label: "Open box" },
+  { id: "used", label: "Used" },
+  { id: "damaged", label: "Damaged" },
+  { id: "for_parts", label: "For Parts" },
 ];
 
 // --- Interfaces for dynamic safety ---
@@ -77,6 +78,16 @@ interface BrowseResponse {
   };
 }
 
+interface CategoryResponse {
+  success: boolean;
+  message: string;
+  statusCode: number;
+  data: Array<{
+    categoryImage: string | null;
+    category: string;
+  }>;
+}
+
 export default function AuctionListingPage() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -103,6 +114,24 @@ export default function AuctionListingPage() {
     }, 500);
     return () => clearTimeout(handler);
   }, [searchInput]);
+
+  // --- Fetch Categories ---
+  const { data: categoriesData, isLoading: categoriesLoading } = useQuery<CategoryResponse>({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products/categories`
+      );
+      const result = await res.json();
+      if (!res.ok || result.success === false) {
+        throw new Error(result.message || "Failed to fetch categories.");
+      }
+      return result;
+    },
+  });
+
+  // Extract category names from response and add "All Products"
+  const categories = ["All Products", ...(categoriesData?.data?.map((item) => item.category) || [])];
 
   // --- TanStack Query Integration ---
   const { data: response, isLoading, isFetching, isError } = useQuery<BrowseResponse>({
@@ -180,7 +209,7 @@ export default function AuctionListingPage() {
     onSuccess: (_, productId) => {
       const product = products.find(p => p._id === productId);
       toast.success(`${product?.title || "Product"} added to wishlist successfully!`);
-      queryClient.invalidateQueries({ queryKey: ["wishlistItems"] });
+      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
     },
     onError: (err: any) => {
       toast.error(err.message || "Add to wishlist failed.");
@@ -235,24 +264,30 @@ export default function AuctionListingPage() {
             {/* Categories Box */}
             <div className="rounded-[8px] border border-[#dce6f5] bg-white p-5 shadow-sm">
               <h3 className="text-[14px] font-bold text-[#111827] mb-3">Categories</h3>
-              <ul className="space-y-2 text-[13px]">
-                {categories.map((cat) => (
-                  <li 
-                    key={cat} 
-                    onClick={() => {
-                      setSelectedCategory(cat);
-                      setCurrentPage(1);
-                    }}
-                    className={`cursor-pointer transition-colors ${
-                      selectedCategory === cat 
-                        ? "font-bold text-[#0b57d0]" 
-                        : "text-[#6b7280] hover:text-[#111827]"
-                    }`}
-                  >
-                    {cat}
-                  </li>
-                ))}
-              </ul>
+              {categoriesLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-[#ff6b1a]" />
+                </div>
+              ) : (
+                <ul className="space-y-2 text-[13px]">
+                  {categories.map((cat) => (
+                    <li 
+                      key={cat} 
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setCurrentPage(1);
+                      }}
+                      className={`cursor-pointer transition-colors ${
+                        selectedCategory === cat 
+                          ? "font-bold text-[#0b57d0]" 
+                          : "text-[#6b7280] hover:text-[#111827]"
+                      }`}
+                    >
+                      {cat}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             {/* Accordion Filter Section */}

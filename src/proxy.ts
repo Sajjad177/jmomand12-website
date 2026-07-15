@@ -8,10 +8,15 @@ export async function proxy(request: NextRequest) {
 
   const isGuest = !token;
 
-  if (isGuest && pathname.startsWith("/dashboard")) {
+  // Protect Dashboard & Cart
+  if (
+    isGuest &&
+    (pathname.startsWith("/dashboard") || pathname.startsWith("/cart"))
+  ) {
     const callbackUrl = encodeURIComponent(pathname);
+
     return NextResponse.redirect(
-      new URL(`/login?callbackUrl=${callbackUrl}`, request.url),
+      new URL(`/login?callbackUrl=${callbackUrl}`, request.url)
     );
   }
 

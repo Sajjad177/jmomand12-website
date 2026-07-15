@@ -1,18 +1,3 @@
-import {
-  CalendarDays,
-  ChevronRight,
-  CircleDollarSign,
-  Gavel,
-  PackageCheck,
-  User,
-} from "lucide-react";
-import Image from "next/image";
-
-import { AuctionOutlineButton, AuctionPrimaryButton } from "./auction-buttons";
-import { AuctionProductCard } from "./auction-product-card";
-import { SiteFooter } from "./site-footer";
-import { SiteHeader } from "./site-header";
-import { homeActiveAuctions } from "../data";
 import Hero from "@/components/hero";
 import AuctionDays from "@/components/auctiondays";
 import BrowseCategories from "@/components/categories";
@@ -24,7 +9,6 @@ import ClosedAuctions from "@/components/closed-auctions";
 import StatsSection from "@/components/StatsSection";
 import UpcomingAuctions from "@/components/UpcomingAuctions";
 import WhyChooseUs from "@/components/WhyChooseUs";
-import Testimonials from "@/components/Testimonials";
 import CTASection from "@/components/CTASection";
 
 const categoryCircles = [

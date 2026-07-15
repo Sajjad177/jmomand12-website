@@ -1,11 +1,10 @@
 import type { AuctionProduct, FilterGroup, NavLink } from "./types";
 
 export const quickLinks: NavLink[] = [
-  { label: "Live Auctions", href: "/" },
+  { label: "Live Auctions", href: "/category" },
   { label: "Categories", href: "/category" },
-  { label: "How It Works", href: "/" },
-  { label: "Upcoming Lots", href: "/" },
-  { label: "Seller Portal", href: "/" },
+  { label: "How It Works", href: "#howitwork" },
+  { label: "Upcoming Lots", href: "#upcomming" },
 ];
 
 export const supportLinks: NavLink[] = [

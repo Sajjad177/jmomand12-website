@@ -45,7 +45,7 @@ export default function Footer() {
 
               <ul className="space-y-4">
                 {[
-                  "Live Auctions",
+                  "",
                   "Categories",
                   "How It Works",
                   "Upcoming Lots",

@@ -30,14 +30,14 @@ export default function Hero() {
 
           <div className="mt-10 flex flex-wrap gap-5">
             <Link
-              href="#"
+              href="/category"
               className="rounded bg-orange-500 px-8 py-4 text-lg font-semibold text-white transition hover:bg-orange-600"
             >
               Live Auctions
             </Link>
 
             <Link
-              href="#"
+              href="/category"
               className="rounded border border-orange-500 px-8 py-4 text-lg font-semibold text-orange-500 transition hover:bg-orange-500 hover:text-white"
             >
               Buy Now
