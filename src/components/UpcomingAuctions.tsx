@@ -128,7 +128,7 @@ export default function UpcomingAuctions() {
     <section className="bg-[#F8FAFC] py-20">
       <div className="container mx-auto px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div id="upcomming" className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-orange-500">
               Future Marketplace

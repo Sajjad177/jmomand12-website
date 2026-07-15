@@ -7,7 +7,7 @@ import { Facebook, Instagram, Loader2, Twitter } from "lucide-react";
 import { toast } from "sonner";
 import { subscribeToNewsletter } from "@/features/search/api/search.api";
 import { AuctionPrimaryButton } from "./auction-buttons";
-import { quickLinks, supportLinks } from "../data";
+import { quickLinks } from "../data";
 import { SiteBrand } from "./site-brand";
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -61,8 +61,8 @@ export function SiteFooter() {
   return (
     <footer className="bg-[#08255a] text-white">
       <div className="container py-12">
-        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.6fr_0.6fr_1fr]">
-          <div>
+        <div className="grid gap-10 lg:grid-cols-4">
+          <div className="col-span-2">
             <SiteBrand />
             <p className="mt-8 max-w-[360px] text-[14px] leading-7 text-[#7e8fb4]">
               Premium liquidation destination for smart buyers. Access exclusive
@@ -85,21 +85,6 @@ export function SiteFooter() {
             <h3 className="text-[14px] font-bold">Quick Links</h3>
             <div className="mt-8 space-y-3">
               {quickLinks.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="block text-[12px] text-[#7e8fb4]"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-[14px] font-bold">Support</h3>
-            <div className="mt-8 space-y-3">
-              {supportLinks.map((item) => (
                 <Link
                   key={item.label}
                   href={item.href}
