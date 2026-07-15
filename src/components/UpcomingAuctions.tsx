@@ -119,7 +119,7 @@ export default function UpcomingAuctions() {
         minute: "2-digit",
         hour12: true,
       }).replace(",", " •");
-    } catch (e) {
+    } catch {
       return "Coming Soon";
     }
   };
@@ -207,7 +207,7 @@ export default function UpcomingAuctions() {
               return (
                 <AuctionCard
                   key={auction._id}
-                  id={auction._id}
+                  href={`/category?auctionId=${encodeURIComponent(auction._id)}&status=upcoming_auction`}
                   image={displayImage}
                   title={displayTitle}
                   category={displayCategory}

@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, ChevronUp, Star, Filter, Loader2, Heart } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -37,6 +37,41 @@ const conditions = [
   { id: "damaged", label: "Damaged" },
   { id: "for_parts", label: "For Parts" },
 ];
+
+const priceRangeParamMap: Record<string, string> = {
+  "under-100": "under-100",
+  "100-500": "100-500",
+  "500-1000": "500-1000",
+  "1000-5000": "1000-5000",
+  "5000-plus": "5000-plus",
+  under_100: "under-100",
+  "100_500": "100-500",
+  "500_1000": "500-1000",
+  "1000_5000": "1000-5000",
+  "5000_plus": "5000-plus",
+};
+
+const priceRangeApiValueMap: Record<string, string> = {
+  "under-100": "under_100",
+  "100-500": "100_500",
+  "500-1000": "500_1000",
+  "1000-5000": "1000_5000",
+  "5000-plus": "5000_plus",
+};
+
+const getListParam = (value: string | null, allowedValues: string[]) => {
+  if (!value) return [];
+
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => allowedValues.includes(item));
+};
+
+const getPageParam = (value: string | null) => {
+  const parsedValue = Number(value || "1");
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : 1;
+};
 
 // --- Interfaces for dynamic safety ---
 interface ProductImage {
@@ -90,21 +125,31 @@ interface CategoryResponse {
 
 export default function AuctionListingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const token = session?.accessToken;
   const queryClient = useQueryClient();
+  const initialSearch = searchParams.get("search") || searchParams.get("searchTerm") || "";
+  const initialCategory = searchParams.get("category") || initialSearch || "All Products";
+  const initialPriceRange = searchParams.get("priceRange");
 
   // --- Search & Filter States ---
-  const [searchInput, setSearchInput] = useState(""); // Local input state
-  const [searchTerm, setSearchTerm] = useState("");   // Debounced or active trigger search term
-  const [selectedCategory, setSelectedCategory] = useState("All Products");
-  const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
-  const [selectedCondition, setSelectedCondition] = useState<string[]>([]);
-  
-  const [minBid, setMinBid] = useState("");
-  const [maxBid, setMaxBid] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState(initialSearch);
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(
+    initialPriceRange ? priceRangeParamMap[initialPriceRange] || null : null,
+  );
+  const [selectedStatus, setSelectedStatus] = useState<string[]>(
+    getListParam(searchParams.get("status"), statuses.map((item) => item.id)),
+  );
+  const [selectedCondition, setSelectedCondition] = useState<string[]>(
+    getListParam(searchParams.get("condition"), conditions.map((item) => item.id)),
+  );
+  const [selectedAuctionId, setSelectedAuctionId] = useState(searchParams.get("auctionId") || "");
+  const [minBid, setMinBid] = useState(searchParams.get("minBid") || "");
+  const [maxBid, setMaxBid] = useState(searchParams.get("maxBid") || "");
+  const [currentPage, setCurrentPage] = useState(getPageParam(searchParams.get("page")));
 
   // Debounce search input to lower API load
   useEffect(() => {
@@ -142,6 +187,7 @@ export default function AuctionListingPage() {
       selectedPriceRange,
       selectedStatus,
       selectedCondition,
+      selectedAuctionId,
       minBid,
       maxBid,
       currentPage,
@@ -153,7 +199,13 @@ export default function AuctionListingPage() {
       if (selectedCategory && selectedCategory !== "All Products") {
         queryParams.append("category", selectedCategory);
       }
-      if (selectedPriceRange) queryParams.append("priceRange", selectedPriceRange);
+      if (selectedAuctionId) queryParams.append("auctionId", selectedAuctionId);
+      if (selectedPriceRange) {
+        queryParams.append(
+          "priceRange",
+          priceRangeApiValueMap[selectedPriceRange] || selectedPriceRange,
+        );
+      }
       
       // Pass multi-select arrays as comma-separated values matching backend splits
       if (selectedCondition.length > 0) {
@@ -234,12 +286,14 @@ export default function AuctionListingPage() {
     setSelectedPriceRange(null);
     setSelectedStatus([]);
     setSelectedCondition([]);
+    setSelectedAuctionId("");
     setMinBid("");
     setMaxBid("");
     setSearchInput("");
     setSearchTerm("");
     setSelectedCategory("All Products");
     setCurrentPage(1);
+    router.replace("/category");
   };
 
   const handleManualSearch = (e: React.FormEvent) => {

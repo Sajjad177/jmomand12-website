@@ -208,7 +208,7 @@ export default function ActiveAuctions() {
               return (
                 <AuctionCard
                   key={auction._id}
-                  id={auction._id}
+                  href={`/category?auctionId=${encodeURIComponent(auction._id)}&status=live_auction`}
                   image={displayImage}
                   title={displayTitle}
                   category={displayCategory}

@@ -281,12 +281,12 @@ export default function ProductDetailsPage() {
                   <div>
                     <div className="text-xs text-slate-400 font-medium">Flash Price</div>
                     <div className="flex items-baseline gap-3 mt-1">
-                      <span className="text-4xl font-extrabold text-[#111827]">${product.price.toFixed(2)}</span>
-                      <span className="text-sm font-bold text-slate-400 line-through">${dummyOldPrice.toFixed(0)}.00</span>
+                      <span className="text-4xl font-extrabold text-[#111827]">${product?.price?.toFixed(2)}</span>
+                      <span className="text-sm font-bold text-slate-400 line-through">${dummyOldPrice?.toFixed(0)}.00</span>
                     </div>
                   </div>
                   <span className="bg-orange-100 text-orange-600 px-3 py-1 text-xs font-bold rounded-full">
-                    Save ${(dummyOldPrice - product.price).toFixed(0)}
+                    Save ${(dummyOldPrice - product?.price).toFixed(0)}
                   </span>
                 </div>
 
