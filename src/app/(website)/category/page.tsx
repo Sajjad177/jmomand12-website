@@ -1,5 +1,9 @@
 import AuctionListingPage from "@/features/auction-site/components/category-page";
+import { Suspense } from "react";
 
 export default function Page() {
-  return <AuctionListingPage/>;
+  return 
+   <Suspense fallback={<div>Loading...</div>}>
+     <AuctionListingPage/>;
+   </Suspense>
 }

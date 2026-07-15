@@ -137,7 +137,7 @@ export default function BrowseCategories() {
 
             return (
               <Link
-                href={`/category?search=${encodeURIComponent(item.category)}`}
+                href={`/category?category=${encodeURIComponent(item.category)}`}
                 key={item.category}
                 className="group cursor-pointer text-center block min-w-[160px] max-w-[160px] snap-start"
               >

@@ -10,7 +10,7 @@ interface AuctionCardProps {
   bids: number;
   currentBid: string;
   timeLeft: string;
-  id:string
+  href: string;
 }
 
 export default function AuctionCard({
@@ -18,7 +18,7 @@ export default function AuctionCard({
   title,
   category,
   bids,
-  id,
+  href,
   currentBid,
   timeLeft,
 }: AuctionCardProps) {
@@ -76,7 +76,7 @@ export default function AuctionCard({
           </div>
         </div>
 
-        <Link href={`/auctions-details/${id}`}>
+        <Link href={href}>
         <button  className="w-full rounded border border-orange-500 py-4 font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white">
          View Details
         </button>
