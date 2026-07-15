@@ -1,8 +1,6 @@
 "use client"
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
-import { AuctionProductCard } from "./auction-product-card";
-import { similarAuctions } from "../data";
 import { useQuery } from "@tanstack/react-query";
 import { ActiveAuctionResponse } from "@/components/Auction/active-auctions";
 import AuctionCard from "@/components/Auction/auction-card";
@@ -80,7 +78,7 @@ const SimilarAuctions = () => {
           return (
             <AuctionCard
               key={auction._id}
-              id={auction._id}
+              href={`/category?auctionId=${encodeURIComponent(auction._id)}&status=live_auction`}
               image={displayImage}
               title={displayTitle}
               category={displayCategory}

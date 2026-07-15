@@ -60,7 +60,7 @@ export default function FeaturedProducts() {
     queryKey: ["featuredProductsData", "for_sale"],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/inventory?type=for_sale`
+        `${process.env.NEXT_PUBLIC_API_URL}/products/inventory?productType=for_sale`
       );
 
       const result = await response.json();
