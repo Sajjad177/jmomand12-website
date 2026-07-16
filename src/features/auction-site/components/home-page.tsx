@@ -36,13 +36,13 @@ export function HomePage() {
       <Hero />
       {/* <AuctionDays /> */}
       <BrowseCategories />
-      <ClosingSoon />
       <ActiveAuctions />
+      <UpcomingAuctions />
+      <ClosingSoon />
       <FeaturedProducts />
       <HowItWorks />
       <ClosedAuctions />
       <StatsSection />
-      <UpcomingAuctions />
       <WhyChooseUs />
       {/* <Testimonials /> */}
       <CTASection />
