@@ -34,7 +34,7 @@ export function HomePage() {
   return (
     <main className=" bg-[#f7f9fc]">
       <Hero />
-      <AuctionDays />
+      {/* <AuctionDays /> */}
       <BrowseCategories />
       <ClosingSoon />
       <ActiveAuctions />

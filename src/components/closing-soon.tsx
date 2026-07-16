@@ -90,7 +90,9 @@ export default function ClosingSoon() {
       const result = await res.json();
 
       if (!res.ok || result.success === false) {
-        throw new Error(result.message || "Failed to fetch closing soon auctions.");
+        throw new Error(
+          result.message || "Failed to fetch closing soon auctions.",
+        );
       }
 
       return result;
@@ -109,19 +111,24 @@ export default function ClosingSoon() {
         <div className="grid gap-8 lg:grid-cols-2">
           {auctions.map((auction) => {
             const countdown = formatCountdown(auction.endsAt, now);
-            const highestBidder = auction.summary.highestBidder
+            const highestBidder = auction.summary?.highestBidder
               ? `${auction.summary.highestBidder.firstName} ${auction.summary.highestBidder.lastName}`
               : null;
 
             return (
-              <div key={auction._id} className="rounded-xl bg-white p-6 shadow-lg">
+              <div
+                key={auction._id}
+                className="rounded-xl bg-white p-6 shadow-lg"
+              >
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">
                       {auction.title}
                     </h3>
 
-                    <p className="mt-3 text-gray-500">{formatClosingDate(auction.endsAt)}</p>
+                    <p className="mt-3 text-gray-500">
+                      {formatClosingDate(auction.endsAt)}
+                    </p>
                   </div>
 
                   <div className="flex items-start gap-2">
@@ -156,7 +163,7 @@ export default function ClosingSoon() {
                   </h4>
 
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
-                    {auction.highValueLots.map((product) => (
+                    {auction.highValueLots?.map((product) => (
                       <div
                         key={product.auctionProductId}
                         className="overflow-hidden rounded-lg border border-[#0D3B8E]"
@@ -184,7 +191,7 @@ export default function ClosingSoon() {
                   </h4>
 
                   <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
-                    {auction.mostBidLots.map((product) => (
+                    {(auction.mostBidLots ?? []).map((product) => (
                       <div
                         key={product.auctionProductId}
                         className="overflow-hidden rounded-lg border border-[#0D3B8E]"
