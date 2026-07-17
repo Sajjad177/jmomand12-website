@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -12,6 +12,7 @@ export default function SignInPage() {
   const { error, loading, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function SignInPage() {
 
               <div className="relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
@@ -80,9 +81,12 @@ export default function SignInPage() {
 
                 <button
                   type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <EyeOff size={20} />
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
