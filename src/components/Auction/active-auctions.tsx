@@ -81,24 +81,32 @@ export interface ActiveAuctionResponse {
   };
 }
 
+interface LiveAuctionProductsResponse {
+  success: boolean;
+  message: string;
+  statusCode: number;
+  data: AuctionProduct[];
+  meta: MetaData;
+}
+
 export default function ActiveAuctions() {
   // Fetching Active Auctions via TanStack useQuery
   const {
     data: responseData,
     isLoading,
     isError,
-  } = useQuery<ActiveAuctionResponse>({
-    queryKey: ["activeAuctionsData"],
+  } = useQuery<LiveAuctionProductsResponse>({
+    queryKey: ["liveAuctionProducts", 1, 12],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auctions/active`,
+        `${process.env.NEXT_PUBLIC_API_URL}/products/browse?status=live_auction&page=1&limit=12`,
       );
 
       const result = await response.json();
 
       if (!response.ok || result.success === false) {
         throw new Error(
-          result.message || "Failed to fetch active auctions data",
+          result.message || "Failed to fetch live auction products",
         );
       }
 
@@ -106,22 +114,7 @@ export default function ActiveAuctions() {
     },
   });
 
-  const auctionsList = responseData?.data?.data || [];
-
-  // Time left formatting logic implementation wrapper for endsAt string
-  const calculateTimeLeft = (endsAtStr: string) => {
-    const total = Date.parse(endsAtStr) - Date.parse(new Date().toString());
-    if (total <= 0) return "Ended";
-
-    const days = Math.floor(total / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((total / 1000 / 60) % 60);
-
-    if (days > 0) {
-      return `${days}d ${hours}h`;
-    }
-    return `${hours}h ${minutes}m`;
-  };
+  const products = responseData?.data || [];
 
   return (
     <section className="bg-[#F8FAFC] py-20">
@@ -184,37 +177,28 @@ export default function ActiveAuctions() {
           <div className="text-center py-12 text-red-500 font-medium">
             Failed to connect or pull live marketplace streaming data.
           </div>
-        ) : auctionsList.length === 0 ? (
+        ) : products.length === 0 ? (
           <div className="text-center py-12 text-slate-400 font-medium">
             No live active auctions right now. Check back soon!
           </div>
         ) : (
           /* Auction Grid Layer renders if mapping length exists */
           <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-            {auctionsList.map((auction) => {
-              // Extracting primary item context layer for card visual presentation fallback
-              const primaryProduct = auction.products?.[0];
+            {products.map((product) => {
               const displayImage =
-                primaryProduct?.images?.[0]?.url ||
-                "/img/auctions/placeholder.png";
-              const displayTitle =
-                auction.title || primaryProduct?.title || "Untitled Auction";
-              const displayCategory =
-                primaryProduct?.category || "General Marketplace";
-              const displayReservePrice = primaryProduct?.reservePrice
-                ? `$${primaryProduct.reservePrice}`
-                : "N/A";
+                product.images?.[0]?.url || "/img/auctions/placeholder.png";
+              const displayReservePrice = `$${product.reservePrice}`;
 
               return (
                 <AuctionCard
-                  key={auction._id}
-                  href={`/category?auctionId=${encodeURIComponent(auction._id)}&status=live_auction`}
+                  key={product._id}
+                  href={`/auction-details/${product._id}`}
                   image={displayImage}
-                  title={displayTitle}
-                  category={displayCategory}
+                  title={product.title || "Untitled Auction"}
+                  category={product.category || "General Marketplace"}
                   bids={0}
                   currentBid={displayReservePrice}
-                  timeLeft={calculateTimeLeft(auction.endsAt)}
+                  timeLeft="Live Now"
                 />
               );
             })}
