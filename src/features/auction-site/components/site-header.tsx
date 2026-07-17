@@ -48,6 +48,7 @@ import {
   ShoppingCart,
   Twitter,
 } from "lucide-react";
+import Image from "next/image";
 
 // Semantic Category Configuration Data
 const CATEGORIES = [
@@ -169,7 +170,7 @@ export function SiteHeader() {
               href="/"
               className="flex-shrink-0 transition-transform active:scale-98"
             >
-              <SiteBrand />
+              <Image src={"/logo.png"} alt="logo" width={900} height={900} className="w-28 " />
             </Link>
 
             {/* Center: Search Trigger Input */}
