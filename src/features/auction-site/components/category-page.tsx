@@ -567,10 +567,10 @@ export default function AuctionListingPage() {
                           
                           <div className="mt-1 flex items-center justify-between text-[10px] font-bold text-[#9ca3af] uppercase">
                             <span>{product.category}</span>
-                            <span className="text-[#0b57d0] font-semibold flex items-center gap-0.5">
+                            {/* <span className="text-[#0b57d0] font-semibold flex items-center gap-0.5">
                               <Star className="w-3 h-3 fill-current" />
-                              {product.averageReview || "4.8"}
-                            </span>
+                              {product.averageReview}
+                            </span> */}
                           </div>
 
                           <div className="mt-3 text-[12px] text-slate-500 leading-tight line-clamp-2">

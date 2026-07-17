@@ -208,7 +208,7 @@ function ActiveBidCard({ item }: { item: DashboardAuctionActiveItem }) {
                 {item.isLeading ? "You're in the lead" : "You've been outbid"}
               </div>
               <Button asChild className="h-12 w-full rounded-md bg-[#fe6819] text-base font-bold hover:bg-[#e45c12]">
-                <Link href={item.auctionId ? `/auctions-details/${item.auctionId}` : "/category"}>
+                <Link href={item.productId ? `/auction-details/${item.productId}` : "/category"}>
                   Increase Bid
                 </Link>
               </Button>
