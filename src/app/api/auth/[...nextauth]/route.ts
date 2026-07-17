@@ -4,7 +4,8 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { refreshAccessToken } from "@/features/auth/api/refresh-token.api";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+const baseUrl =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
 const getRefreshTokenFromCookie = (setCookie: string | null) => {
   if (!setCookie) return "";
@@ -43,6 +44,10 @@ const handler = NextAuth({
           }
 
           const user = data.data?.user;
+          if (user.role == "admin") {
+            throw new Error("Only  users can access this website");
+          }
+
           const accessToken = data.data?.accessToken;
           const refreshToken = getRefreshTokenFromCookie(
             res.headers.get("set-cookie"),
@@ -65,7 +70,10 @@ const handler = NextAuth({
           };
         } catch (error) {
           console.error("Authorize error:", error);
-          throw new Error("Invalid email or password");
+          if (error instanceof Error) {
+            throw new Error(error.message);
+          }
+          throw new Error(String(error));
         }
       },
     }),

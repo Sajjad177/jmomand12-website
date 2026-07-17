@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { FormEvent, useState } from "react";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -12,6 +12,8 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
@@ -78,7 +80,7 @@ export default function SignUpPage() {
           </label>
           <div className="relative">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -86,9 +88,15 @@ export default function SignUpPage() {
               required
               className="h-14 w-full rounded-xl border border-gray-200 px-4 pr-12 outline-none transition focus:border-[#0057FF]"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <EyeOff size={20} />
-            </span>
+            <button
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
         </div>
 
@@ -98,7 +106,7 @@ export default function SignUpPage() {
           </label>
           <div className="relative">
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
@@ -106,9 +114,19 @@ export default function SignUpPage() {
               required
               className="h-14 w-full rounded-xl border border-gray-200 px-4 pr-12 outline-none transition focus:border-[#0057FF]"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <EyeOff size={20} />
-            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setShowConfirmPassword((visible) => !visible)
+              }
+              aria-label={
+                showConfirmPassword ? "Hide confirm password" : "Show confirm password"
+              }
+              aria-pressed={showConfirmPassword}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
         </div>
 

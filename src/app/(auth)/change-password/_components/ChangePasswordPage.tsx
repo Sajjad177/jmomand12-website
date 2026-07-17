@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { FormEvent, useState } from "react";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -9,6 +9,8 @@ export default function ChangePasswordPage() {
   const { error, loading, resetPassword } = useAuth();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,7 +29,7 @@ export default function ChangePasswordPage() {
           </label>
           <div className="relative">
             <input
-              type="password"
+              type={showNewPassword ? "text" : "password"}
               placeholder="••••••••"
               value={newPassword}
               onChange={(event) => setNewPassword(event.target.value)}
@@ -35,9 +37,15 @@ export default function ChangePasswordPage() {
               required
               className="h-14 w-full rounded-xl border border-gray-200 px-4 pr-12 outline-none transition focus:border-[#0057FF]"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <EyeOff size={20} />
-            </span>
+            <button
+              type="button"
+              onClick={() => setShowNewPassword((visible) => !visible)}
+              aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+              aria-pressed={showNewPassword}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
         </div>
 
@@ -47,7 +55,7 @@ export default function ChangePasswordPage() {
           </label>
           <div className="relative">
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)}
@@ -55,9 +63,19 @@ export default function ChangePasswordPage() {
               required
               className="h-14 w-full rounded-xl border border-gray-200 px-4 pr-12 outline-none transition focus:border-[#0057FF]"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <EyeOff size={20} />
-            </span>
+            <button
+              type="button"
+              onClick={() =>
+                setShowConfirmPassword((visible) => !visible)
+              }
+              aria-label={
+                showConfirmPassword ? "Hide confirm password" : "Show confirm password"
+              }
+              aria-pressed={showConfirmPassword}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
         </div>
 
