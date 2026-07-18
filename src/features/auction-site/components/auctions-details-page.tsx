@@ -439,11 +439,11 @@ export default function AuctionProductDetailsPage() {
                 <div className="space-y-4 p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <div className="text-[12px] text-[#6b7280]">
+                      <div className="text-[12px] mb-3 text-[#6b7280]">
                         Current bid
                       </div>
                       <div className="flex items-end gap-2">
-                        <div className="text-[46px] font-black leading-none text-[#111827]">
+                        <div className="text-[30px] font-semibold leading-none text-[#111827]">
                           {formatCurrency(currentBid)}
                         </div>
                       </div>
