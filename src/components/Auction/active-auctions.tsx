@@ -1,86 +1,99 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+
 import AuctionCard from "./auction-card";
-import { LiveAuctionProductsResponse } from "../../types/AuctionType";
 import Loading from "../loading";
+import { useActiveAuctionProducts } from "../../hooks/useAuction";
 
 export default function ActiveAuctions() {
-  // Fetching Active Auctions via TanStack useQuery
   const {
-    data: responseData,
+    data: activeProducts,
     isLoading,
     isError,
-  } = useQuery<LiveAuctionProductsResponse>({
-    queryKey: ["liveAuctionProducts", 1, 12],
-    queryFn: async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/browse?status=live_auction&page=1&limit=12`,
-      );
+    error,
+    refetch,
+  } = useActiveAuctionProducts();
 
-      const result = await response.json();
-
-      if (!response.ok || result.success === false) {
-        throw new Error(
-          result.message || "Failed to fetch live auction products",
-        );
-      }
-
-      return result;
-    },
-  });
-
-  const products = responseData?.data || [];
+  const products = (activeProducts || []).filter(
+    (product) => product.status === "active",
+  );
+  console.log("products for auction", products);
 
   return (
-    <section className="bg-[#F8FAFC] py-20">
-      <div className="container mx-auto px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <section className="bg-slate-50 py-16 md:py-24">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Block */}
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between md:mb-14">
           <div>
-            <h2 className="text-4xl font-bold text-slate-900 lg:text-5xl">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
               Active Auctions
             </h2>
+            <p className="mt-2 text-sm text-slate-500 sm:text-base">
+              Live bidding on premium marketplace collectibles.
+            </p>
           </div>
 
           <Link
             href="/category"
-            className="inline-flex w-fit items-center rounded bg-orange-500 px-8 py-4 font-semibold text-white transition hover:bg-orange-600"
+            className="inline-flex items-center justify-center rounded-xl bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition-all duration-200 hover:bg-orange-600 shadow-sm hover:shadow active:scale-[0.98] sm:px-8 sm:py-3.5 sm:text-base"
           >
-            View All
+            View All Items
           </Link>
         </div>
 
-        {/* Dynamic Skeleton and Error UI Block states tracking inside same grid template */}
+        {/* Dynamic States Layout Engine */}
         {isLoading ? (
           <Loading />
         ) : isError ? (
-          <div className="text-center py-12 text-red-500 font-medium">
-            Failed to connect or pull live marketplace streaming data.
+          <div className="mx-auto max-w-md text-center py-12">
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm font-medium text-red-600">
+              Failed to connect or pull live marketplace data. Please refresh.
+            </div>
           </div>
         ) : products.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 font-medium">
-            No live active auctions right now. Check back soon!
+          <div className="text-center py-16 rounded-3xl border border-dashed border-slate-200 bg-white p-8">
+            <p className="text-slate-400 font-medium">
+              No live active auctions right now. Check back soon!
+            </p>
           </div>
         ) : (
-          /* Auction Grid Layer renders if mapping length exists */
-          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
+          /* Grid Presentation Layer */
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => {
               const displayImage =
-                product.images?.[0]?.url || "/img/auctions/placeholder.png";
-              const displayReservePrice = `$${product.reservePrice}`;
+                product.productId?.images?.[0]?.url ||
+                "/img/auctions/placeholder.png";
+              const currentBidVal =
+                product.highestBid?.amount ||
+                product.startingBid ||
+                product.productId?.reservePrice ||
+                0;
+              const displayBid = `$${currentBidVal}`;
+              const title = product.productId?.title || "Untitled Auction";
+              const category =
+                product.productId?.category || "General Marketplace";
+              const description = product.productId?.description || "";
+              const condition = product.productId?.condition || "";
 
               return (
                 <AuctionCard
                   key={product._id}
                   href={`/auction-details/${product._id}`}
                   image={displayImage}
-                  title={product.title || "Untitled Auction"}
-                  category={product.category || "General Marketplace"}
+                  title={title}
+                  category={category}
+                  description={description}
+                  condition={condition}
+                  currentBid={displayBid}
+                  timeLeft={product.auctionId?.endsAt || ""}
+                  status={product.status}
+                  auctionProductId={product._id}
+                  startingBid={product.startingBid}
+                  bidIncrement={product.bidIncrement}
+                  highestBidAmount={product.highestBid?.amount || 0}
+                  onBidPlaced={refetch}
                   bids={0}
-                  currentBid={displayReservePrice}
-                  timeLeft="Live Now"
                 />
               );
             })}
