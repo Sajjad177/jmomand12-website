@@ -175,5 +175,15 @@
 }
 
 .btn-gradient {
-  background: linear-gradient(180deg, #FFA576 0%, #FE6819 100%);
+  background: linear-gradient(180deg, #ffa576 0%, #fe6819 100%);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
