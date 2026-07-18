@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type StripeElementsOptions } from "@stripe/stripe-js";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, CheckCircle2, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { dashboardKeys } from "@/features/dashboard/hooks/useDashboardData";
 import {
   createSetupIntent,
   createTestDefaultPaymentMethod,
+  getTestHelperStatus,
   saveDefaultPaymentMethod,
 } from "../api/payment.api";
 
@@ -199,6 +200,13 @@ export function PaymentMethodDialog({
   const [stripePromise, setStripePromise] = useState<ReturnType<typeof loadStripe> | null>(null);
   const hasInitializedForOpenRef = useRef(false);
 
+  const testHelperStatus = useQuery({
+    queryKey: ["payments", "test-helper-status"],
+    queryFn: getTestHelperStatus,
+    enabled: open && Boolean(session),
+    staleTime: 60_000,
+  });
+
   const setupIntentMutation = useMutation({
     mutationFn: createSetupIntent,
     onSuccess: (result) => {
@@ -245,7 +253,7 @@ export function PaymentMethodDialog({
 
   const isBusy =
     setupIntentMutation.isPending || saveDefaultMutation.isPending || testCardMutation.isPending;
-  const canUseDevHelper = process.env.NODE_ENV !== "production";
+  const canUseDevHelper = testHelperStatus.data?.enabled === true;
 
   function prepareSetupIntent() {
     if (setupIntentMutation.isPending || hasInitializedForOpenRef.current) return;

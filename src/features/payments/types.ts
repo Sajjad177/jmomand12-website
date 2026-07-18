@@ -5,6 +5,10 @@ export type SetupIntentResponse = {
   publishableKey?: string;
 };
 
+export type TestHelperStatus = {
+  enabled: boolean;
+};
+
 export type SetupIntentStatus = {
   id: string;
   status: string;
