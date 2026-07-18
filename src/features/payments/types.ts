@@ -3,10 +3,7 @@ export type SetupIntentResponse = {
   setupIntentId: string;
   clientSecret: string | null;
   publishableKey?: string;
-};
-
-export type TestHelperStatus = {
-  enabled: boolean;
+  testHelperEnabled: boolean;
 };
 
 export type SetupIntentStatus = {
