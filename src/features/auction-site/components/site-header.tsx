@@ -49,6 +49,8 @@ import {
   Twitter,
 } from "lucide-react";
 import Image from "next/image";
+import { useCategories } from "../../../hooks/useCategory";
+import CategoriesDropdown from "../../../components/CategoriesDropdown";
 
 // Semantic Category Configuration Data
 const CATEGORIES = [
@@ -70,6 +72,9 @@ export function SiteHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const [authRequiredModalOpen, setAuthRequiredModalOpen] = useState(false);
+
+  const { data, isLoading, isError } = useCategories();
+  const categories = data?.data;
 
   // Data Fetching Infrastructure (Retained)
   const wishlist = useDashboardWishlist();
@@ -170,7 +175,13 @@ export function SiteHeader() {
               href="/"
               className="flex-shrink-0 transition-transform active:scale-98"
             >
-              <Image src={"/logo.png"} alt="logo" width={900} height={900} className="w-28 " />
+              <Image
+                src={"/logo.png"}
+                alt="logo"
+                width={900}
+                height={900}
+                className="w-28 "
+              />
             </Link>
 
             {/* Center: Search Trigger Input */}
@@ -201,6 +212,7 @@ export function SiteHeader() {
                 <Layers className="h-4 w-4 text-blue-400" />
                 All Categories
               </Link>
+              {/* <CategoriesDropdown /> */}
 
               {session ? (
                 <Link

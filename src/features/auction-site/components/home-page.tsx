@@ -11,25 +11,6 @@ import UpcomingAuctions from "@/components/UpcomingAuctions";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import CTASection from "@/components/CTASection";
 
-const categoryCircles = [
-  { title: "Appliances", image: "/images/login.jpg" },
-  {
-    title: "Electronics",
-    image: "/images/12043465729ab7c8ceffce00749e7c71df0c9e25.jpg",
-  },
-  { title: "Automotive", image: "/images/car.jpg" },
-  {
-    title: "Office",
-    image: "/images/4f8da1b70693c4fcf9e01b9293706aed5cd4e34d.jpg",
-  },
-  { title: "Kitchen", image: "/images/login.jpg" },
-  {
-    title: "Furniture",
-    image: "/images/4f8da1b70693c4fcf9e01b9293706aed5cd4e34d (1).jpg",
-  },
-  { title: "Overstock", image: "/images/car.jpg" },
-];
-
 export function HomePage() {
   return (
     <main className=" bg-[#f7f9fc]">
