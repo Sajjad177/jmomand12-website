@@ -130,9 +130,13 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    font-family: var(--font-inter), sans-serif;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-inter), sans-serif !important;
+    font-family: inherit;
   }
 }
 
@@ -170,7 +174,7 @@
   }
 
   .font-poppins {
-    font-family: var(--font-poppins), sans-serif;
+    font-family: var(--font-inter), sans-serif;
   }
 }
 

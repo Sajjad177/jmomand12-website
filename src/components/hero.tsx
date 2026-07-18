@@ -98,7 +98,7 @@ export default function Hero() {
               </p>
 
               <h1 className="text-2xl sm:text-4xl md:text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.15] lg:leading-[1.1]">
-                Bid Smarter.
+                Bid Smart.
                 <br />
                 <span className="text-orange-500 bg-gradient-to-r from-orange-400 to-orange-600 bg-clip-text text-transparent">
                   Win Bigger.
