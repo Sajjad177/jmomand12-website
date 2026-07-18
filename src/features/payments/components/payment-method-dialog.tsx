@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type StripeElementsOptions } from "@stripe/stripe-js";
@@ -20,6 +20,7 @@ import { dashboardKeys } from "@/features/dashboard/hooks/useDashboardData";
 import {
   createSetupIntent,
   createTestDefaultPaymentMethod,
+  getTestHelperStatus,
   saveDefaultPaymentMethod,
 } from "../api/payment.api";
 
@@ -200,10 +201,34 @@ export function PaymentMethodDialog({
   const [canUseDevHelper, setCanUseDevHelper] = useState(false);
   const hasInitializedForOpenRef = useRef(false);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    let isActive = true;
+
+    void getTestHelperStatus()
+      .then((status) => {
+        if (isActive) {
+          setCanUseDevHelper(status.enabled === true);
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setCanUseDevHelper(false);
+        }
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [open]);
+
   const setupIntentMutation = useMutation({
     mutationFn: createSetupIntent,
     onSuccess: (result) => {
-      setCanUseDevHelper(result.testHelperEnabled === true);
+      setCanUseDevHelper((current) => current || result.testHelperEnabled === true);
 
       if (!result.clientSecret || !result.publishableKey) {
         setInlineError("Stripe is not fully configured yet. Please try again later.");

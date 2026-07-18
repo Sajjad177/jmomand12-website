@@ -6,10 +6,16 @@ import type {
   SavedPaymentProfile,
   SetupIntentResponse,
   SetupIntentStatus,
+  TestHelperStatus,
 } from "../types";
 
 export async function createSetupIntent() {
   const response = await api.post<ApiResponse<SetupIntentResponse>>("/payments/setup-intents");
+  return response.data.data;
+}
+
+export async function getTestHelperStatus() {
+  const response = await api.get<ApiResponse<TestHelperStatus>>("/payments/test-helper-status");
   return response.data.data;
 }
 
