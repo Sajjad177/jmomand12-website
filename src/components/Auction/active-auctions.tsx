@@ -3,91 +3,8 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import AuctionCard from "./auction-card";
-
-// --- Shadcn UI Skeleton Component Inline Implementation ---
-function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={`animate-pulse rounded-md bg-slate-200/80 dark:bg-slate-800/80 ${className}`}
-      {...props}
-    />
-  );
-}
-
-// --- API Interfaces Definition matching your response structural mapping ---
-interface AuctionProductImage {
-  public_id: string;
-  url: string;
-}
-
-interface AuctionProduct {
-  _id: string;
-  inventoryId: string;
-  title: string;
-  description: string;
-  category: string;
-  condition: string;
-  day: string;
-  reservePrice: number;
-  inventoryStatus: string;
-  images: AuctionProductImage[];
-  totalReview: number;
-  type: string;
-  color: string[];
-  quantity: number;
-  averageReview: number;
-}
-
-interface PickupSchedule {
-  startDate: string;
-  endDate: string;
-  dailyStartTime: string;
-  dailyEndTime: string;
-  durationInDays: number;
-}
-
-interface AuctionItem {
-  _id: string;
-  auctionId: string;
-  products: AuctionProduct[];
-  title: string;
-  description: string;
-  startsAt: string;
-  endsAt: string;
-  durationInDays: number;
-  status: string;
-  pickupSchedule: PickupSchedule;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MetaData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPage: number;
-}
-
-export interface ActiveAuctionResponse {
-  success: boolean;
-  message: string;
-  statusCode: number;
-  data: {
-    meta: MetaData;
-    data: AuctionItem[];
-  };
-}
-
-interface LiveAuctionProductsResponse {
-  success: boolean;
-  message: string;
-  statusCode: number;
-  data: AuctionProduct[];
-  meta: MetaData;
-}
+import { LiveAuctionProductsResponse } from "../../types/AuctionType";
+import Loading from "../loading";
 
 export default function ActiveAuctions() {
   // Fetching Active Auctions via TanStack useQuery
@@ -122,18 +39,9 @@ export default function ActiveAuctions() {
         {/* Header */}
         <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-orange-500">
-              Live Marketplace
-            </p>
-
             <h2 className="text-4xl font-bold text-slate-900 lg:text-5xl">
               Active Auctions
             </h2>
-
-            <p className="mt-4 text-lg text-slate-500">
-              Discover trending liquidation auctions, electronics, furniture,
-              appliances, tools and much more.
-            </p>
           </div>
 
           <Link
@@ -146,33 +54,7 @@ export default function ActiveAuctions() {
 
         {/* Dynamic Skeleton and Error UI Block states tracking inside same grid template */}
         {isLoading ? (
-          /* --- Shadcn UI Skeleton Grid Layout matching your AuctionCard structure --- */
-          <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="flex flex-col overflow-hidden rounded-xl border border-slate-100 bg-white p-4 shadow-sm space-y-4"
-              >
-                {/* Image Placeholder */}
-                <Skeleton className="h-48 w-full rounded-lg" />
-
-                {/* Category & Title Placeholders */}
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-1/4" />
-                  <Skeleton className="h-5 w-3/4" />
-                </div>
-
-                {/* Footer Meta Data Placeholders */}
-                <div className="pt-2 border-t border-slate-50 flex items-center justify-between">
-                  <div className="space-y-1 w-1/3">
-                    <Skeleton className="h-3 w-1/2" />
-                    <Skeleton className="h-4 w-full" />
-                  </div>
-                  <Skeleton className="h-6 w-1/4 rounded-full" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <Loading />
         ) : isError ? (
           <div className="text-center py-12 text-red-500 font-medium">
             Failed to connect or pull live marketplace streaming data.

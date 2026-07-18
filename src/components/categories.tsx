@@ -1,35 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import { CategoriesApiResponse } from "../types/CategoryTypes";
 import { CategorySkeleton } from "./loading";
+import { useCategories } from "../hooks/useCategory";
 
 export default function BrowseCategories() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { data, isLoading, isError } = useCategories();
+  const categories = data?.data;
 
-  // --- TanStack Query Integration pipeline mapping ---
-  const {
-    data: response,
-    isLoading,
-    isError,
-  } = useQuery<CategoriesApiResponse>({
-    queryKey: ["productCategories"],
-    queryFn: async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/categories`,
-      );
-      const result = await res.json();
-      if (!res.ok || result.success === false) {
-        throw new Error(result.message || "Failed to fetch categories schema.");
-      }
-      return result;
-    },
-  });
-
-  const categories = response?.data || [];
   const placeholderImage = "/placeholder-category.png";
 
   // Slider Navigation Logic
@@ -128,7 +110,7 @@ export default function BrowseCategories() {
             className="no-scrollbar flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto scroll-smooth pb-4 snap-x snap-mandatory px-1"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {categories.map((item) => {
+            {categories.map((item: any) => {
               const dynamicDisplayImage = item.categoryImage?.url
                 ? item.categoryImage.url
                 : placeholderImage;
