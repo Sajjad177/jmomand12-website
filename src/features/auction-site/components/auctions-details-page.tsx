@@ -42,10 +42,13 @@ function getErrorMessage(error: unknown, fallback: string) {
     typeof error === "object" &&
     error !== null &&
     "response" in error &&
-    typeof (error as { response?: { data?: { message?: string } } }).response?.data?.message ===
-      "string"
+    typeof (error as { response?: { data?: { message?: string } } }).response
+      ?.data?.message === "string"
   ) {
-    return (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? fallback;
+    return (
+      (error as { response?: { data?: { message?: string } } }).response?.data
+        ?.message ?? fallback
+    );
   }
 
   if (error instanceof Error && error.message) {
@@ -91,7 +94,9 @@ export default function AuctionProductDetailsPage() {
   const [bidAmount, setBidAmount] = useState("");
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [countdownTick, setCountdownTick] = useState(0);
-  const [queuedBidAfterPayment, setQueuedBidAfterPayment] = useState<number | null>(null);
+  const [queuedBidAfterPayment, setQueuedBidAfterPayment] = useState<
+    number | null
+  >(null);
 
   const lotQuery = useQuery({
     queryKey: ["auction-product-details", productId],
@@ -110,8 +115,12 @@ export default function AuctionProductDetailsPage() {
     mutationFn: createBid,
     onSuccess: async () => {
       toast.success("Bid placed successfully.");
-      await queryClient.invalidateQueries({ queryKey: ["auction-product-details", productId] });
-      await queryClient.invalidateQueries({ queryKey: dashboardKeys.auctionActivity });
+      await queryClient.invalidateQueries({
+        queryKey: ["auction-product-details", productId],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: dashboardKeys.auctionActivity,
+      });
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, "We couldn't place your bid."));
@@ -120,16 +129,21 @@ export default function AuctionProductDetailsPage() {
 
   const lot = lotQuery.data;
   const product = lot?.product;
-  const galleryImages =
-    product?.images?.length ? product.images : [{ public_id: "placeholder", url: "/images/login.jpg" }];
-  const currentDisplayImage = galleryImages[activeImageIndex]?.url || galleryImages[0]?.url;
+  const galleryImages = product?.images?.length
+    ? product.images
+    : [{ public_id: "placeholder", url: "/images/login.jpg" }];
+  const currentDisplayImage =
+    galleryImages[activeImageIndex]?.url || galleryImages[0]?.url;
   const minimumNextBid = lot?.minimumNextBid ?? 0;
-  const currentBid = lot?.highestBid.amount && lot.highestBid.amount > 0
-    ? lot.highestBid.amount
-    : lot?.startingBid ?? 0;
+  const currentBid =
+    lot?.highestBid.amount && lot.highestBid.amount > 0
+      ? lot.highestBid.amount
+      : (lot?.startingBid ?? 0);
   const quickBidAmount = minimumNextBid > 0 ? minimumNextBid : currentBid;
   const hasPaymentMethod = Boolean(profileQuery.data?.hasDefaultPaymentMethod);
-  const canBid = Boolean(lot?.canBid && !getCountdownParts(lot?.auction?.endsAt).ended);
+  const canBid = Boolean(
+    lot?.canBid && !getCountdownParts(lot?.auction?.endsAt).ended,
+  );
   const statusLabel = lot?.status ? formatCondition(lot.status) : "loading";
 
   useEffect(() => {
@@ -141,7 +155,8 @@ export default function AuctionProductDetailsPage() {
   }, []);
 
   const countdown = getCountdownParts(lot?.auction?.endsAt, countdownTick);
-  const displayedBidAmount = bidAmount || (minimumNextBid ? minimumNextBid.toFixed(2) : "");
+  const displayedBidAmount =
+    bidAmount || (minimumNextBid ? minimumNextBid.toFixed(2) : "");
 
   async function submitBidAmount(amount: number) {
     await bidMutation.mutateAsync({
@@ -191,8 +206,13 @@ export default function AuctionProductDetailsPage() {
   if (lotQuery.isError || !lot || !product) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-[#f7f9fc] p-4 text-center">
-        <p className="text-sm font-bold text-slate-700">We couldn&apos;t load this auction lot right now.</p>
-        <button onClick={() => router.back()} className="mt-3 text-xs font-bold text-[#003da5] hover:underline">
+        <p className="text-sm font-bold text-slate-700">
+          We couldn&apos;t load this auction lot right now.
+        </p>
+        <button
+          onClick={() => router.back()}
+          className="mt-3 text-xs font-bold text-[#003da5] hover:underline"
+        >
           Go Back
         </button>
       </div>
@@ -222,7 +242,9 @@ export default function AuctionProductDetailsPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setActiveImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))
+                          setActiveImageIndex((prev) =>
+                            prev === 0 ? galleryImages.length - 1 : prev - 1,
+                          )
                         }
                         className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#111827] shadow-sm"
                       >
@@ -231,7 +253,9 @@ export default function AuctionProductDetailsPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          setActiveImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))
+                          setActiveImageIndex((prev) =>
+                            prev === galleryImages.length - 1 ? 0 : prev + 1,
+                          )
                         }
                         className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#111827] shadow-sm"
                       >
@@ -253,7 +277,12 @@ export default function AuctionProductDetailsPage() {
                           : "border-[#dce6f5] opacity-70 hover:opacity-100"
                       }`}
                     >
-                      <Image src={image.url} alt="" fill className="object-cover" />
+                      <Image
+                        src={image.url}
+                        alt=""
+                        fill
+                        className="object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -280,20 +309,26 @@ export default function AuctionProductDetailsPage() {
 
                 <div className="mt-5 grid gap-4 border-b border-[#dce6f5] pb-5 md:grid-cols-4">
                   <div className="text-center md:border-r md:border-[#dce6f5]">
-                    <div className="text-[11px] text-[#6b7280]">Current bid</div>
+                    <div className="text-[11px] text-[#6b7280]">
+                      Current bid
+                    </div>
                     <div className="mt-1 text-[16px] font-semibold text-[#111827]">
                       {formatCurrency(currentBid)}
                     </div>
                   </div>
                   <div className="text-center md:border-r md:border-[#dce6f5]">
-                    <div className="text-[11px] text-[#6b7280]">Starting bid</div>
+                    <div className="text-[11px] text-[#6b7280]">
+                      Starting bid
+                    </div>
                     <div className="mt-1 text-[13px] font-medium text-[#374151]">
                       {formatCurrency(lot.startingBid)}
                     </div>
                   </div>
                   <div className="text-center md:border-r md:border-[#dce6f5]">
                     <div className="text-[11px] text-[#6b7280]">Category</div>
-                    <div className="mt-1 text-[13px] font-medium text-[#374151]">{product.category}</div>
+                    <div className="mt-1 text-[13px] font-medium text-[#374151]">
+                      {product.category}
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-[11px] text-[#6b7280]">Condition</div>
@@ -304,15 +339,20 @@ export default function AuctionProductDetailsPage() {
                 </div>
 
                 <div className="mt-4">
-                  <h2 className="text-[14px] font-bold text-[#111827]">Product description</h2>
+                  <h2 className="text-[14px] font-bold text-[#111827]">
+                    Product description
+                  </h2>
                   <p className="mt-2 max-w-[850px] text-[13px] leading-6 text-[#6b7280]">
-                    {product.description || "No product description is available for this lot yet."}
+                    {product.description ||
+                      "No product description is available for this lot yet."}
                   </p>
                 </div>
 
                 <div className="mt-5 grid gap-3 md:grid-cols-2">
                   <div className="rounded-[8px] bg-[#eef4ff] px-4 py-4">
-                    <div className="text-[12px] text-[#6b7280]">Auction window</div>
+                    <div className="text-[12px] text-[#6b7280]">
+                      Auction window
+                    </div>
                     <div className="mt-1 text-[14px] font-bold text-[#003da5]">
                       {lot.auction?.startsAt
                         ? `${new Date(lot.auction.startsAt).toLocaleDateString()} - ${new Date(
@@ -322,7 +362,9 @@ export default function AuctionProductDetailsPage() {
                     </div>
                   </div>
                   <div className="rounded-[8px] bg-[#eef4ff] px-4 py-4">
-                    <div className="text-[12px] text-[#6b7280]">Bid increment</div>
+                    <div className="text-[12px] text-[#6b7280]">
+                      Bid increment
+                    </div>
                     <div className="mt-1 text-[14px] font-bold text-[#003da5]">
                       {formatCurrency(lot.bidIncrement)}
                     </div>
@@ -335,35 +377,51 @@ export default function AuctionProductDetailsPage() {
                   Specifications overview
                 </div>
                 <div className="px-5 py-6">
-                  <h2 className="text-[22px] font-bold text-[#111827]">Lot details</h2>
+                  <h2 className="text-[22px] font-bold text-[#111827]">
+                    Lot details
+                  </h2>
                   <div className="mt-4 space-y-4 text-[13px] leading-6 text-[#6b7280]">
                     <p>
-                      Review the lot details, current bidding state, and payment readiness before placing a bid.
-                      Bids are charged only if you win when the auction closes.
+                      Review the lot details, current bidding state, and payment
+                      readiness before placing a bid. Bids are charged only if
+                      you win when the auction closes.
                     </p>
                   </div>
 
                   <div className="mt-6 overflow-hidden rounded-[4px] border border-[#e5edf8]">
                     <div className="grid grid-cols-[1fr_1fr] border-b border-[#e5edf8] text-[12px]">
-                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">Manufacturer</div>
-                      <div className="px-4 py-3 text-[#6b7280]">{product.manufacturer || "Not specified"}</div>
-                    </div>
-                    <div className="grid grid-cols-[1fr_1fr] border-b border-[#e5edf8] text-[12px]">
-                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">Colors</div>
+                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">
+                        Manufacturer
+                      </div>
                       <div className="px-4 py-3 text-[#6b7280]">
-                        {product.color?.length ? product.color.join(", ") : "Not specified"}
+                        {product.manufacturer || "Not specified"}
                       </div>
                     </div>
                     <div className="grid grid-cols-[1fr_1fr] border-b border-[#e5edf8] text-[12px]">
-                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">Inventory status</div>
+                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">
+                        Colors
+                      </div>
+                      <div className="px-4 py-3 text-[#6b7280]">
+                        {product.color?.length
+                          ? product.color.join(", ")
+                          : "Not specified"}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-[1fr_1fr] border-b border-[#e5edf8] text-[12px]">
+                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">
+                        Inventory status
+                      </div>
                       <div className="px-4 py-3 capitalize text-[#6b7280]">
                         {formatCondition(product.inventoryStatus)}
                       </div>
                     </div>
                     <div className="grid grid-cols-[1fr_1fr] text-[12px]">
-                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">Reviews</div>
+                      <div className="bg-[#f8fbff] px-4 py-3 text-[#6b7280]">
+                        Reviews
+                      </div>
                       <div className="px-4 py-3 text-[#6b7280]">
-                        {product.totalReview} reviews • {product.averageReview.toFixed(1)} avg rating
+                        {product.totalReview} reviews •{" "}
+                        {product.averageReview.toFixed(1)} avg rating
                       </div>
                     </div>
                   </div>
@@ -381,7 +439,9 @@ export default function AuctionProductDetailsPage() {
                 <div className="space-y-4 p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <div className="text-[12px] text-[#6b7280]">Current bid</div>
+                      <div className="text-[12px] text-[#6b7280]">
+                        Current bid
+                      </div>
                       <div className="flex items-end gap-2">
                         <div className="text-[46px] font-black leading-none text-[#111827]">
                           {formatCurrency(currentBid)}
@@ -389,12 +449,19 @@ export default function AuctionProductDetailsPage() {
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-[12px] text-[#6b7280]">
                         <Timer className="h-4 w-4 text-[#0b57d0]" />
-                        Ends {lot.auction?.endsAt ? new Date(lot.auction.endsAt).toLocaleString() : "soon"}
+                        Ends{" "}
+                        {lot.auction?.endsAt
+                          ? new Date(lot.auction.endsAt).toLocaleString()
+                          : "soon"}
                       </div>
                     </div>
                     <div className="rounded-2xl border border-[#dce6f5] bg-[#f8fbff] px-3 py-2 text-right">
-                      <div className="text-[11px] uppercase text-[#6b7280]">Min next bid</div>
-                      <div className="text-lg font-bold text-[#111827]">{formatCurrency(minimumNextBid)}</div>
+                      <div className="text-[11px] uppercase text-[#6b7280]">
+                        Min next bid
+                      </div>
+                      <div className="text-lg font-bold text-[#111827]">
+                        {formatCurrency(minimumNextBid)}
+                      </div>
                     </div>
                   </div>
 
@@ -409,9 +476,16 @@ export default function AuctionProductDetailsPage() {
                         [countdown.mins, "Mins"],
                         [countdown.secs, "Secs"],
                       ].map(([value, label]) => (
-                        <div key={label} className="rounded-[6px] bg-white px-3 py-3 text-center">
-                          <div className="text-[22px] font-bold text-[#111827]">{value}</div>
-                          <div className="mt-1 text-[10px] font-bold uppercase text-[#6b7280]">{label}</div>
+                        <div
+                          key={label}
+                          className="rounded-[6px] bg-white px-3 py-3 text-center"
+                        >
+                          <div className="text-[22px] font-bold text-[#111827]">
+                            {value}
+                          </div>
+                          <div className="mt-1 text-[10px] font-bold uppercase text-[#6b7280]">
+                            {label}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -419,12 +493,13 @@ export default function AuctionProductDetailsPage() {
 
                   {!hasPaymentMethod ? (
                     <div className="rounded-[8px] border border-[#f7d288] bg-[#fff9e9] px-4 py-3 text-[12px] text-[#b66500]">
-                      Save a payment method before bidding so we can securely charge the winning card when the
-                      auction closes.
+                      Save a payment method before bidding so we can securely
+                      charge the winning card when the auction closes.
                     </div>
                   ) : (
                     <div className="rounded-[8px] border border-[#d1fae5] bg-[#ecfdf5] px-4 py-3 text-[12px] text-[#047857]">
-                      Your default payment method is saved and ready for bidding.
+                      Your default payment method is saved and ready for
+                      bidding.
                     </div>
                   )}
 
@@ -462,14 +537,17 @@ export default function AuctionProductDetailsPage() {
                   </div>
 
                   <div className="rounded-2xl border border-[#dce6f5] bg-[#f8fbff] p-4 text-[12px] text-[#6b7280]">
-                    <p className="font-semibold text-[#111827]">Bidding rules</p>
+                    <p className="font-semibold text-[#111827]">
+                      Bidding rules
+                    </p>
                     <p className="mt-2">
-                      Bids must be at least {formatCurrency(minimumNextBid)}. Current increment is{" "}
-                      {formatCurrency(lot.bidIncrement)}.
+                      Bids must be at least {formatCurrency(minimumNextBid)}.
+                      Current increment is {formatCurrency(lot.bidIncrement)}.
                     </p>
                     {!canBid ? (
                       <p className="mt-2 text-[#b45309]">
-                        This lot is currently {statusLabel}. Bidding is only available while the lot is active.
+                        This lot is currently {statusLabel}. Bidding is only
+                        available while the lot is active.
                       </p>
                     ) : null}
                   </div>
@@ -493,22 +571,100 @@ export default function AuctionProductDetailsPage() {
 
               <div className="auction-card overflow-hidden rounded-[8px] bg-white">
                 <div className="flex items-center justify-between border-b border-[#dce6f5] bg-[#f8fbff] px-4 py-3">
-                  <span className="text-[14px] font-bold text-[#111827]">Live lot activity</span>
-                  <span className="text-[11px] uppercase text-[#6b7280]">{statusLabel}</span>
+                  <span className="text-[14px] font-bold text-[#111827]">
+                    Live lot activity
+                  </span>
+                  <span className="text-[11px] uppercase text-[#6b7280]">
+                    {statusLabel}
+                  </span>
                 </div>
                 <div className="space-y-3 p-4 text-[12px] text-[#475569]">
-                  <div className="flex items-center justify-between rounded-xl border border-[#dce6f5] px-3 py-3">
-                    <span>Highest bidder</span>
-                    <span className="font-semibold text-[#111827]">
-                      {lot.highestBid.bidder
-                        ? `${lot.highestBid.bidder.firstName} ${lot.highestBid.bidder.lastName}`
-                        : "No bids yet"}
-                    </span>
+                  <div className="rounded-xl border border-[#dce6f5] p-4 space-y-3">
+                    <h3 className="text-lg font-semibold text-[#111827]">
+                      Highest Bidder
+                    </h3>
+
+                    {lot.highestBid?.bidder ? (
+                      <>
+                        <div className="flex items-center justify-between border-b pb-2">
+                          <span className="text-gray-500">Name</span>
+                          <span className="font-medium">
+                            {lot.highestBid.bidder.firstName}{" "}
+                            {lot.highestBid.bidder.lastName}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b pb-2">
+                          <span className="text-gray-500">Email</span>
+                          <span className="font-medium">
+                            {lot.highestBid.bidder.email}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b pb-2">
+                          <span className="text-gray-500">Role</span>
+                          <span className="font-medium capitalize">
+                            {lot.highestBid.bidder.role}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b pb-2">
+                          <span className="text-gray-500">Verified</span>
+                          <span
+                            className={`font-medium ${
+                              lot.highestBid.bidder.isVerified
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {lot.highestBid.bidder.isVerified ? "Yes" : "No"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between border-b pb-2">
+                          <span className="text-gray-500">Payment Method</span>
+                          <span
+                            className={`font-medium ${
+                              lot.highestBid.bidder.hasDefaultPaymentMethod
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}
+                          >
+                            {lot.highestBid.bidder.hasDefaultPaymentMethod
+                              ? "Added"
+                              : "Not Added"}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-500">Status</span>
+                          <span
+                            className={`rounded-full px-2 py-1 text-xs font-semibold ${
+                              lot.highestBid.bidder.isBlocked
+                                ? "bg-red-100 text-red-600"
+                                : lot.highestBid.bidder.isSuspend
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-green-100 text-green-700"
+                            }`}
+                          >
+                            {lot.highestBid.bidder.isBlocked
+                              ? "Blocked"
+                              : lot.highestBid.bidder.isSuspend
+                                ? "Suspended"
+                                : "Active"}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-center text-gray-500">No bids yet</p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between rounded-xl border border-[#dce6f5] px-3 py-3">
                     <span>Winning status</span>
                     <span className="font-semibold text-[#111827]">
-                      {lot.winner ? `${lot.winner.firstName} ${lot.winner.lastName}` : "Still open"}
+                      {lot.winner
+                        ? `${lot.winner.firstName} ${lot.winner.lastName}`
+                        : "Still open"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between rounded-xl border border-[#dce6f5] px-3 py-3">
@@ -549,11 +705,16 @@ export default function AuctionProductDetailsPage() {
           await lotQuery.refetch();
 
           if (!refreshedProfile.data?.hasDefaultPaymentMethod) {
-            toast.error("Your account still is not marked as payment-ready. Please try again.");
+            toast.error(
+              "Your account still is not marked as payment-ready. Please try again.",
+            );
             return;
           }
 
-          if (queuedBidAfterPayment != null && Number.isFinite(queuedBidAfterPayment)) {
+          if (
+            queuedBidAfterPayment != null &&
+            Number.isFinite(queuedBidAfterPayment)
+          ) {
             const nextBid = queuedBidAfterPayment;
             setQueuedBidAfterPayment(null);
             await submitBidAmount(nextBid);

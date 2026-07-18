@@ -2,8 +2,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ActiveAuctionResponse } from "@/components/Auction/active-auctions";
 import AuctionCard from "@/components/Auction/auction-card";
+import { ActiveAuctionResponse } from "@/types/AuctionType";
 
 const SimilarAuctions = () => {
   // Fetching Active Auctions via TanStack useQuery
