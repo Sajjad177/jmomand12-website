@@ -532,7 +532,7 @@ export default function AuctionProductDetailsPage() {
                       disabled={!canBid || bidMutation.isPending}
                       onClick={() => void handleBidSubmit()}
                     >
-                      {bidMutation.isPending ? "Submitting..." : "Place Bid"}
+                      {bidMutation.isPending ? "Submitting..." : "Smart Bid"}
                     </AuctionOutlineButton>
                   </div>
 
