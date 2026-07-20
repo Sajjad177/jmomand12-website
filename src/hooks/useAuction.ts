@@ -11,5 +11,7 @@ export const useActiveAuctionProducts = () => {
       const response = await getAllActiveProduct();
       return response.data;
     },
+    staleTime: 30_000,
+    refetchInterval: 30_000,
   });
 };

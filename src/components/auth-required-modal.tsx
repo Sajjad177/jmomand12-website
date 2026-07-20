@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Lock, LogIn, UserPlus } from "lucide-react";
+import { Lock, ArrowRight, UserPlus } from "lucide-react";
 
 import {
   Dialog,
@@ -22,52 +22,51 @@ export function AuthRequiredModal({
 }: AuthRequiredModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden rounded-3xl border-0 p-0 shadow-[0_30px_80px_rgba(15,23,42,.18)] sm:max-w-[430px]">
-        {/* Top Section */}
-        <div className="bg-gradient-to-br from-[#0D3B8E] via-[#1253c5] to-[#1f6fff] px-8 py-8">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/15 backdrop-blur-md">
-            <Lock className="h-10 w-10 text-[#FB670A]" />
+      <DialogContent className="overflow-hidden rounded-2xl border border-slate-100 bg-white p-0 shadow-[0_24px_70px_-10px_rgba(15,23,42,0.12)] sm:max-w-[400px]">
+
+        {/* Top Minimal Icon Header */}
+        <div className="pt-8 pb-4 flex justify-center">
+          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 border border-slate-100 ring-4 ring-slate-50/50">
+            <Lock className="h-6 w-6 text-slate-700" strokeWidth={2.2} />
           </div>
         </div>
 
-        {/* Body */}
-        <div className="px-8 py-7">
-          <DialogHeader className="space-y-3 text-center">
-            <DialogTitle className="text-2xl font-bold text-slate-900">
-              Sign in Required
+        {/* Body Content */}
+        <div className="px-6 pb-8">
+          <DialogHeader className="space-y-2 text-center">
+            <DialogTitle className="text-xl font-bold tracking-tight text-slate-900">
+              Authentication Required
             </DialogTitle>
-
-            <DialogDescription className="text-[15px] leading-6 text-slate-600">
-              Please sign in or create an account to access this feature and
-              enjoy a personalized shopping experience.
+            <DialogDescription className="text-sm leading-relaxed text-slate-500">
+              Please sign in or create an account to unlock this feature and personalize your shopping experience.
             </DialogDescription>
           </DialogHeader>
 
-          {/* Buttons */}
-          <div className="mt-8 flex gap-5">
+          {/* Action Buttons */}
+          <div className="mt-6 flex flex-col gap-2.5">
             <Link
               href="/login"
               onClick={() => onOpenChange(false)}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#FB670A] text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#FB670A]/80"
+              className="group flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 text-sm font-medium text-white transition-all duration-200 hover:bg-slate-800 active:scale-[0.98]"
             >
-              <LogIn className="h-4 w-4" />
               Log In
+              <ArrowRight className="h-4 w-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5" />
             </Link>
 
             <Link
               href="/signup"
               onClick={() => onOpenChange(false)}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-50"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 active:scale-[0.98]"
             >
-              <UserPlus className="h-4 w-4" />
+              <UserPlus className="h-4 w-4 text-slate-500" />
               Create Account
             </Link>
           </div>
 
-          {/* Footer */}
-          <div className="mt-4 border-t border-slate-100 pt-5 text-center">
-            <p className="text-xs leading-5 text-slate-500">
-              Join thousands of customers already shopping with us.
+          {/* Minimal Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-slate-400 font-medium">
+              Join thousands of customers shopping with us.
             </p>
           </div>
         </div>

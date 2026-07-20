@@ -18,7 +18,6 @@ export default function ActiveAuctions() {
   const products = (activeProducts || []).filter(
     (product) => product.status === "active",
   );
-  console.log("products for auction", products);
 
   return (
     <section className="bg-slate-50 py-16 md:py-24">

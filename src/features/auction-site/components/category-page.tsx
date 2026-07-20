@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, ChevronUp, Star, Filter, Loader2, Heart } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import { dashboardKeys } from "@/features/dashboard/hooks/useDashboardData";
 
 // --- Static Meta Configuration matching backend schema limits ---
 
@@ -32,10 +33,14 @@ const statuses = [
 const conditions = [
   { id: "new", label: "Brand New" },
   { id: "like_new", label: "Like New / Open Box" },
-  { id: "open box", label: "Open box" },
+  { id: "open_box", label: "Open Box" },
   { id: "used", label: "Used" },
   { id: "damaged", label: "Damaged" },
   { id: "for_parts", label: "For Parts" },
+  { id: "brand_new", label: "Brand New" },
+  { id: "like_new_open_box", label: "Like New Open Box" },
+  { id: "scratch_and_dent", label: "Scratch & Dent" },
+  { id: "salvage", label: "Salvage" },
 ];
 
 const priceRangeParamMap: Record<string, string> = {
@@ -261,7 +266,7 @@ export default function AuctionListingPage() {
     onSuccess: (_, productId) => {
       const product = products.find(p => p._id === productId);
       toast.success(`${product?.title || "Product"} added to wishlist successfully!`);
-      queryClient.invalidateQueries({ queryKey: ["wishlist"] });
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.wishlist });
     },
     onError: (err: any) => {
       toast.error(err.message || "Add to wishlist failed.");
