@@ -121,6 +121,17 @@ export async function getAuctionProductDetails(id: string) {
   return response.data.data;
 }
 
+export async function resolveAuctionProductDetails(id: string) {
+  try {
+    return await getAuctionProductDetails(id);
+  } catch (error) {
+    const activeProducts = (await getAllActiveProduct()).data;
+    const matchingLot = activeProducts.find((item) => item.productId?._id === id);
+    if (!matchingLot) throw error;
+    return getAuctionProductDetails(matchingLot._id);
+  }
+}
+
 export async function getAllActiveProduct() {
   const res = await api.get<ApiResponse<ActiveAuctionProduct[]>>("/auction-products/active");
   return res.data;

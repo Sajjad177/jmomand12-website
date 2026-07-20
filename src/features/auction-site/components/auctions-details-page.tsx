@@ -22,7 +22,7 @@ import { getMyProfile } from "@/features/dashboard/api/dashboard.api";
 import { PaymentMethodDialog } from "@/features/payments/components/payment-method-dialog";
 import { createBid } from "@/features/payments/api/payment.api";
 import { AuctionPrimaryButton, AuctionOutlineButton } from "./auction-buttons";
-import { getAuctionProductDetails } from "../api/auction.api";
+import { resolveAuctionProductDetails } from "../api/auction.api";
 
 function formatCurrency(value?: number | null) {
   return new Intl.NumberFormat("en-US", {
@@ -100,8 +100,10 @@ export default function AuctionProductDetailsPage() {
 
   const lotQuery = useQuery({
     queryKey: ["auction-product-details", productId],
-    queryFn: () => getAuctionProductDetails(productId),
+    queryFn: () => resolveAuctionProductDetails(productId),
     enabled: Boolean(productId),
+    staleTime: 30_000,
+    refetchInterval: 30_000,
   });
 
   const profileQuery = useQuery({

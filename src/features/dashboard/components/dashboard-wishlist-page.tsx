@@ -8,12 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardShell } from "./dashboard-shell";
-import { useDashboardWishlist, useRemoveWishlistItem } from "../hooks/useDashboardData";
+import {
+  useDashboardWishlist,
+  useMoveWishlistItemToCart,
+  useRemoveWishlistItem,
+} from "../hooks/useDashboardData";
+import type { WishlistItem } from "../types";
 import { getTimeUntil } from "../utils";
 
 export function DashboardWishlistPage() {
   const wishlist = useDashboardWishlist();
   const removeItem = useRemoveWishlistItem();
+  const moveToCart = useMoveWishlistItemToCart();
   const [query, setQuery] = useState("");
 
   const filteredItems = useMemo(() => {
@@ -35,6 +41,15 @@ export function DashboardWishlistPage() {
       toast.success("Removed from wishlist.");
     } catch {
       toast.error("We couldn't remove this item right now.");
+    }
+  }
+
+  async function handleMoveToCart(item: WishlistItem) {
+    try {
+      await moveToCart.mutateAsync(item);
+      toast.success("Moved to cart.");
+    } catch {
+      toast.error("We couldn't move this item to your cart.");
     }
   }
 
@@ -76,7 +91,10 @@ export function DashboardWishlistPage() {
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {filteredItems.map((item) => {
               const product = item.productId;
-              const href = "/category";
+              const href =
+                product.type === "for_sale"
+                  ? `/product-details/${product._id}`
+                  : `/category?searchTerm=${encodeURIComponent(product.inventoryId)}`;
 
               return (
                 <article key={item._id} className="overflow-hidden rounded-2xl border border-[#dce6f5] bg-white shadow-sm">
@@ -123,9 +141,20 @@ export function DashboardWishlistPage() {
                       </div>
                     </div>
 
-                    <Button asChild className="h-12 w-full rounded-xl bg-[#fe6819] hover:bg-[#e45c12]">
-                      <Link href={href}>View Details</Link>
-                    </Button>
+                    {product.type === "for_sale" ? (
+                      <Button
+                        type="button"
+                        onClick={() => void handleMoveToCart(item)}
+                        disabled={moveToCart.isPending}
+                        className="h-12 w-full rounded-xl bg-[#fe6819] hover:bg-[#e45c12]"
+                      >
+                        {moveToCart.isPending ? "Moving..." : "Move to Cart"}
+                      </Button>
+                    ) : (
+                      <Button asChild className="h-12 w-full rounded-xl bg-[#fe6819] hover:bg-[#e45c12]">
+                        <Link href={href}>View Details</Link>
+                      </Button>
+                    )}
                   </div>
                 </article>
               );

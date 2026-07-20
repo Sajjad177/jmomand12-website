@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, ShoppingCart, ShieldCheck, ArrowLeft, Plus, Minus, Star, Award } from "lucide-react";
+import { Heart, ShoppingCart, ShieldCheck, ArrowLeft, Plus, Minus, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
@@ -85,13 +85,7 @@ export default function ProductDetailsPage() {
   });
 
   const product = response?.data;
-
-  // Set default color once data loads successfully
-  useState(() => {
-    if (product?.color && product.color.length > 0) {
-      setSelectedColor(product.color[0]);
-    }
-  });
+  const effectiveSelectedColor = selectedColor || product?.color?.[0] || "";
 
   // --- Add To Cart Mutation ---
   const addToCartMutation = useMutation({
@@ -125,6 +119,35 @@ export default function ProductDetailsPage() {
     onError: (err: any) => {
       toast.error(err.message || "Add to cart failed.");
     },
+  });
+
+  const addToWishlistMutation = useMutation({
+    mutationFn: async () => {
+      if (!token) {
+        router.push(`/login?callbackUrl=${encodeURIComponent(`/product-details/${productId}`)}`);
+        throw new Error("Please log in to save this product.");
+      }
+      if (!product) throw new Error("No product data loaded.");
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/carts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ productId: product._id, type: "wishlist" }),
+      });
+      const result = await res.json();
+      if (!res.ok || result.success === false) {
+        throw new Error(result.message || "Failed to add product to wishlist.");
+      }
+      return result;
+    },
+    onSuccess: () => {
+      toast.success(`${product?.title} added to wishlist.`);
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "wishlist"] });
+    },
+    onError: (error: Error) => toast.error(error.message),
   });
 
   // Quantity control helpers
@@ -183,8 +206,6 @@ export default function ProductDetailsPage() {
 
   const productImages = product.images || [];
   const activeMainImage = productImages[activeImgIndex]?.url || "/images/placeholder.png";
-  const dummyOldPrice = product.price * 1.3; // UI Dummy markdown representation 
-
   return (
     <main className="bg-[#f8f9fb] min-h-screen py-10">
       <div className="container mx-auto px-4 max-w-7xl space-y-8">
@@ -282,12 +303,8 @@ export default function ProductDetailsPage() {
                     <div className="text-xs text-slate-400 font-medium">Flash Price</div>
                     <div className="flex items-baseline gap-3 mt-1">
                       <span className="text-4xl font-extrabold text-[#111827]">${product?.price?.toFixed(2)}</span>
-                      <span className="text-sm font-bold text-slate-400 line-through">${dummyOldPrice?.toFixed(0)}.00</span>
                     </div>
                   </div>
-                  <span className="bg-orange-100 text-orange-600 px-3 py-1 text-xs font-bold rounded-full">
-                    Save ${(dummyOldPrice - product?.price).toFixed(0)}
-                  </span>
                 </div>
 
                 {/* Description */}
@@ -306,7 +323,7 @@ export default function ProductDetailsPage() {
                           key={col}
                           onClick={() => setSelectedColor(col)}
                           className={`px-4 py-1.5 rounded-full border text-xs font-bold uppercase transition-all ${
-                            selectedColor === col
+                            effectiveSelectedColor === col
                               ? "bg-[#003da5] text-white border-[#003da5]"
                               : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
                           }`}
@@ -338,6 +355,16 @@ export default function ProductDetailsPage() {
                       <Plus className="w-4 h-4" />
                     </button>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => addToWishlistMutation.mutate()}
+                    disabled={addToWishlistMutation.isPending}
+                    aria-label="Add product to wishlist"
+                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-[#e5edf8] bg-white text-slate-500 transition hover:border-red-200 hover:text-red-500 disabled:opacity-50"
+                  >
+                    <Heart className="h-4 w-4" />
+                  </button>
 
                   {/* Add to Cart */}
                   <button

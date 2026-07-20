@@ -3,10 +3,14 @@ export type SetupIntentResponse = {
   setupIntentId: string;
   clientSecret: string | null;
   publishableKey?: string;
+  testHelperEnabled: boolean;
 };
 
 export type TestHelperStatus = {
   enabled: boolean;
+  nodeEnv?: string;
+  stripeTestMode?: boolean;
+  message?: string;
 };
 
 export type SetupIntentStatus = {

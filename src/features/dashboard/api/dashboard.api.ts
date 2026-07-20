@@ -73,6 +73,15 @@ export async function removeWishlistItem(wishlistItemId: string) {
   await api.delete<ApiResponse<null>>(`/carts/${wishlistItemId}`);
 }
 
+export async function moveWishlistItemToCart(item: WishlistItem) {
+  await api.post<ApiResponse<unknown>>("/carts", {
+    productId: item.productId._id,
+    type: "cart",
+    quantity: 1,
+  });
+  await api.delete<ApiResponse<null>>(`/carts/${item._id}`);
+}
+
 export async function schedulePickup(payload: {
   slotId: string;
   invoiceIds: string[];

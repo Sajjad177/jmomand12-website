@@ -110,7 +110,7 @@ export default function BrowseCategories() {
             className="no-scrollbar flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto scroll-smooth pb-4 snap-x snap-mandatory px-1"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {categories.map((item: any) => {
+            {categories?.map((item: any) => {
               const dynamicDisplayImage = item.categoryImage?.url
                 ? item.categoryImage.url
                 : placeholderImage;

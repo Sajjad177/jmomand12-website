@@ -169,6 +169,33 @@ export function useAuth() {
     [router],
   );
 
+  const resendOtp = useCallback(async (type: AuthFlow) => {
+    setLoading(true);
+    setError("");
+    try {
+      const tokenKey =
+        type === "signup" ? SIGNUP_ACCESS_TOKEN_KEY : PASSWORD_RESET_TOKEN_KEY;
+      const token = readStorage(tokenKey);
+      if (!token) throw new Error("Your verification session has expired. Please start again.");
+      const url =
+        type === "signup"
+          ? "/users/email-verifications/resend"
+          : "/auth/resend-forgot-otp";
+      const response = await api.post(
+        url,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return { ok: true, message: response.data?.message } satisfies AuthResult;
+    } catch (err) {
+      const message = getAuthErrorMessage(err, "Could not resend OTP");
+      setError(message);
+      return { ok: false, message } satisfies AuthResult;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const resetPassword = useCallback(
     async ({ newPassword, confirmPassword }: ResetPasswordPayload) => {
       if (newPassword !== confirmPassword) {
@@ -216,6 +243,7 @@ export function useAuth() {
     signup,
     forgotPassword,
     verifyOtp,
+    resendOtp,
     resetPassword,
   };
 }

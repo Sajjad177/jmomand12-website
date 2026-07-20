@@ -9,6 +9,7 @@ import {
   getMyProfile,
   getMyReadyInvoices,
   getMyWishlist,
+  moveWishlistItemToCart,
   removeWishlistItem,
   schedulePickup,
   updateMyProfile,
@@ -67,10 +68,12 @@ export function usePickupSlots(enabled = true) {
   });
 }
 
-export function useDashboardWishlist() {
+export function useDashboardWishlist(enabled = true) {
   return useQuery({
     queryKey: dashboardKeys.wishlist,
     queryFn: getMyWishlist,
+    enabled,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -107,6 +110,18 @@ export function useRemoveWishlistItem() {
     mutationFn: removeWishlistItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: dashboardKeys.wishlist });
+    },
+  });
+}
+
+export function useMoveWishlistItemToCart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: moveWishlistItemToCart,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: dashboardKeys.wishlist });
+      queryClient.invalidateQueries({ queryKey: ["userCartData"] });
     },
   });
 }

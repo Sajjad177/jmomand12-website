@@ -77,10 +77,10 @@ export function SiteHeader() {
   const categories = data?.data;
 
   // Data Fetching Infrastructure (Retained)
-  const wishlist = useDashboardWishlist();
-  const items = wishlist.data ?? [];
   const { data: session } = useSession();
   const token = session?.accessToken;
+  const wishlist = useDashboardWishlist(Boolean(token));
+  const items = wishlist.data ?? [];
 
   const handleProtectedNavigation = (path: string) => {
     if (session) {
@@ -493,14 +493,14 @@ export function SiteHeader() {
                           ) : (
                             <div className="grid grid-cols-2 gap-2 px-2 mt-1">
                               <Link
-                                href="/auth/login"
+                                href="/login"
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="flex h-9 items-center justify-center rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 active:scale-95 transition-transform"
                               >
                                 Login
                               </Link>
                               <Link
-                                href="/auth/register"
+                                href="/signup"
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="flex h-9 items-center justify-center rounded-xl bg-[#FF6900] text-xs font-bold text-white shadow-md active:scale-95 transition-transform"
                               >
