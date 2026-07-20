@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type ProductCardProps = {
   image: string;
@@ -9,8 +10,7 @@ type ProductCardProps = {
   category: string;
   bids: number;
   price: string;
-  id: string
-
+  id: string;
 };
 
 export default function ProductCard({
@@ -20,8 +20,9 @@ export default function ProductCard({
   id,
   price,
 }: ProductCardProps) {
+  const router = useRouter();
   return (
-    <Link href={"/products-list/asf56465sdfa"}>
+    <Link href={`/product-details/${id}`} className="group">
       <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
         {/* Product Image */}
         <div className="relative h-72 w-full overflow-hidden">
@@ -52,11 +53,17 @@ export default function ProductCard({
               <h4 className="text-2xl font-bold text-black">{price}</h4>
             </div>
 
-           <Link href={`/product-details/${id}`}>
-            <button className="flex-1 rounded-sm border border-orange-500 px-6 py-4 text-sm font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                router.push(`/product-details/${id}`);
+              }}
+              className="flex-1 rounded-sm border border-orange-500 px-6 py-4 text-sm font-bold text-orange-500 transition hover:bg-orange-500 hover:text-white"
+            >
               View Product
             </button>
-           </Link>
           </div>
         </div>
       </div>
