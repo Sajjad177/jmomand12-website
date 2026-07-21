@@ -50,41 +50,52 @@ const features = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="bg-[#0D5FD4] py-20">
-      <div id="#howitwork" className="container mx-auto px-6">
-        {/* Heading */}
-        <div className="mb-16 text-center">
-          <h2 className="text-4xl font-bold text-white lg:text-5xl">
+    <section id="howitwork" className="bg-[#0D5FD4] py-16 sm:py-20 lg:py-24">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="mb-12 text-center sm:mb-16">
+          <p className="mb-2 text-xs font-bold uppercase tracking-widest text-orange-400">
+            Built For Trust
+          </p>
+
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl">
             Why Choose Us
           </h2>
 
-          <p className="mx-auto mt-4 max-w-3xl text-xl text-slate-100">
+          <p className="mx-auto mt-4 max-w-2xl text-base text-blue-100 sm:text-lg">
             The most trusted premium liquidation marketplace for smart buyers.
           </p>
         </div>
 
-        {/* Cards */}
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => {
             const Icon = feature.icon;
 
             return (
               <div
                 key={index}
-                className="rounded-lg border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                className="group flex h-full flex-col justify-between rounded-2xl border border-[#2573E8] bg-white p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1 hover:border-orange-500/50"
               >
-                <div className="mb-5">
-                  <Icon
-                    className="h-10 w-10 text-orange-500"
-                    strokeWidth={2.2}
-                  />
+                <div>
+                  {/* Icon Frame */}
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-xl bg-orange-50 transition-colors duration-300 group-hover:bg-orange-500">
+                    <Icon
+                      className="h-7 w-7 text-orange-500 transition-colors duration-300 group-hover:text-white"
+                      strokeWidth={2}
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mb-3 text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                    {feature.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-sm sm:text-base leading-relaxed text-slate-500">
+                    {feature.description}
+                  </p>
                 </div>
-
-                <h3 className="mb-4 text-xl font-bold text-gray-900">
-                  {feature.title}
-                </h3>
-
-                <p className="leading-7 text-gray-500">{feature.description}</p>
               </div>
             );
           })}
