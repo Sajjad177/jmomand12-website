@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
+import { ClosedAuctionResponse } from "@/types/close-AuctionTypes";
 
 // --- Shadcn UI Skeleton Component Inline Implementation ---
 function Skeleton({
@@ -16,84 +17,25 @@ function Skeleton({
   );
 }
 
-// --- API Interfaces Definition matching your response structural mapping ---
-interface AuctionProductImage {
-  public_id: string;
-  url: string;
-}
-
-interface AuctionProduct {
-  _id: string;
-  inventoryId: string;
-  title: string;
-  description: string;
-  category: string;
-  condition: string;
-  day: string;
-  reservePrice: number;
-  inventoryStatus: string;
-  images: AuctionProductImage[];
-  totalReview: number;
-  type: string;
-  color: string[];
-  quantity: number;
-  manufacturer: string;
-  averageReview: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface PickupSchedule {
-  startDate: string;
-  endDate: string;
-  dailyStartTime: string;
-  dailyEndTime: string;
-  durationInDays: number;
-}
-
-interface ClosedAuctionItem {
-  _id: string;
-  auctionId: string;
-  products: AuctionProduct[];
-  title: string;
-  description: string;
-  startsAt: string;
-  endsAt: string;
-  durationInDays: number;
-  status: string;
-  pickupSchedule: PickupSchedule;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface MetaData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPage: number;
-}
-
-interface ClosedAuctionResponse {
-  success: boolean;
-  message: string;
-  statusCode: number;
-  data: ClosedAuctionItem[];
-  meta: MetaData;
-}
-
 export default function ClosedAuctions() {
   // Fetch Closed Auctions dynamic data inside TanStack useQuery
-  const { data: responseData, isLoading, isError } = useQuery<ClosedAuctionResponse>({
+  const {
+    data: responseData,
+    isLoading,
+    isError,
+  } = useQuery<ClosedAuctionResponse>({
     queryKey: ["closedAuctionsData"],
     queryFn: async () => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auctions/closed`
+        `${process.env.NEXT_PUBLIC_API_URL}/auctions/closed`,
       );
 
       const result = await response.json();
 
       if (!response.ok || result.success === false) {
-        throw new Error(result.message || "Failed to fetch closed auctions data");
+        throw new Error(
+          result.message || "Failed to fetch closed auctions data",
+        );
       }
 
       return result;
@@ -132,7 +74,7 @@ export default function ClosedAuctions() {
               <div key={index} className="overflow-hidden rounded-lg space-y-4">
                 {/* Image Skeleton */}
                 <Skeleton className="h-96 w-full rounded-t-lg" />
-                
+
                 {/* Content Box Skeleton */}
                 <div className="border border-slate-100 p-5 space-y-4 rounded-b-lg">
                   <Skeleton className="h-7 w-3/4" />
@@ -164,9 +106,13 @@ export default function ClosedAuctions() {
             {closedAuctionsList.map((item) => {
               // Primary product and fallback management
               const primaryProduct = item.products?.[0];
-              const displayImage = primaryProduct?.images?.[0]?.url || "/closed.png";
-              const displayTitle = item.title || primaryProduct?.title || "Untitled Auction";
-              const displayBid = primaryProduct?.reservePrice ? `$${primaryProduct.reservePrice.toFixed(2)}` : "$0.00";
+              const displayImage =
+                primaryProduct?.images?.[0]?.url || "/closed.png";
+              const displayTitle =
+                item.title || primaryProduct?.title || "Untitled Auction";
+              const displayBid = primaryProduct?.reservePrice
+                ? `$${primaryProduct.reservePrice.toFixed(2)}`
+                : "$0.00";
               const displayClosedDate = formatClosedDate(item.endsAt);
 
               return (
@@ -193,7 +139,10 @@ export default function ClosedAuctions() {
 
                   {/* Content block descriptors */}
                   <div className="space-y-5 rounded-b-lg border border-slate-200 bg-white p-5">
-                    <h3 className="line-clamp-1 text-2xl font-semibold text-gray-900" title={displayTitle}>
+                    <h3
+                      className="line-clamp-1 text-2xl font-semibold text-gray-900"
+                      title={displayTitle}
+                    >
                       {displayTitle}
                     </h3>
 
