@@ -1,19 +1,13 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 
-import { AuctionCardProps } from "../../types/AuctionType";
-import { createBid } from "@/features/payments/api/payment.api";
-import { getMyProfile } from "@/features/dashboard/api/dashboard.api";
-import { dashboardKeys } from "@/features/dashboard/hooks/useDashboardData";
-import { PaymentMethodDialog } from "@/features/payments/components/payment-method-dialog";
 import { AuthRequiredModal } from "@/components/auth-required-modal";
 import {
   Dialog,
@@ -24,6 +18,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { getMyProfile } from "@/features/dashboard/api/dashboard.api";
+import { dashboardKeys } from "@/features/dashboard/hooks/useDashboardData";
+import { createBid } from "@/features/payments/api/payment.api";
+import { PaymentMethodDialog } from "@/features/payments/components/payment-method-dialog";
+import { AuctionCardProps } from "../../types/AuctionType";
 
 // Extended inline interface safely handling the extra properties from the image design
 interface RefinedAuctionCardProps extends AuctionCardProps {
@@ -300,7 +299,13 @@ export default function AuctionCard({
           {status === "active" ? (
             <div className="grid grid-cols-2 gap-2 w-full mt-auto">
               <button
-                onClick={() => setSmartBidModalOpen(true)}
+                onClick={() => {
+                  if (authStatus !== "authenticated") {
+                    setAuthModalOpen(true);
+                    return;
+                  }
+                  setSmartBidModalOpen(true);
+                }}
                 disabled={bidMutation.isPending}
                 className="w-full bg-[#FF6B00] hover:bg-[#E05E00] text-white py-3 text-xs md:text-sm font-bold rounded-xl transition-all duration-300 active:scale-[0.97] hover:shadow-lg hover:shadow-orange-500/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
